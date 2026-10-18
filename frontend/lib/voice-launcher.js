@@ -40,6 +40,9 @@ export const LAUNCHABLE_APPS=[
 export function stripWake(text){const q=String(text||'').toLowerCase().trim().replace(/^[,\s]+/,'');for(const w of WAKE_WORDS){if(q===w)return{woke:true,rest:''};if(q.startsWith(w+' ')||q.startsWith(w+','))return{woke:true,rest:q.slice(w.length).replace(/^[,\s]+/,'')}}return{woke:false,rest:q}}
 export function findApp(spoken){const q=String(spoken||'').toLowerCase().trim();if(!q)return null;for(const app of LAUNCHABLE_APPS)for(const n of app.names){if(q===n)return app}for(const app of LAUNCHABLE_APPS)for(const n of app.names){if(q.startsWith(n+' ')||q.endsWith(' '+n))return app}return null}
 export function appLaunchUrl(app,isAndroid){if(isAndroid&&app.pkg)return 'intent://#Intent;package='+app.pkg+';end';return app.web||''}
+// What to do when the browser speech service reports an error.
+// Silence and aborted sessions are normal on phones: just restart.
+export function micErrorAction(kind){if(kind==='no-speech'||kind==='aborted')return'restart';if(kind==='network'||kind==='service-unavailable'||kind==='busy')return'restart-notify';return'fatal'}
 export function voiceLaunch(text){
   const q=String(text||'').toLowerCase().trim().replace(/[.!?]+$/,'');
   const play=text.match(/^(?:play|sunao|chalao|suna do|chala do)\s+([\s\S]+?)(?:\s+on youtube|\s+youtube pe|\s+youtube par)?$/i);

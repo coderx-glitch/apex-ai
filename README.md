@@ -56,7 +56,13 @@ guest workspace (notes, tasks, games - all local).
 ## Project layout
 
 ```
-app.py             Flask server + API routes (chat, status, file upload)
+app.py             Flask server + API routes (chat, summarize, status,
+                   file upload bridge, access check, model list)
 requirements.txt   Python dependencies
 frontend/          React source (Vite build -> ../dist)
 ```
+
+Not ported from my earlier Vercel version: the paid media experiments
+(image/video generation) - they need extra cloud accounts and I did not
+want secrets-heavy code in this repo. The routes above cover the whole
+daily-use app.

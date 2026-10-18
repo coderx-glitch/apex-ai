@@ -56,13 +56,17 @@ guest workspace (notes, tasks, games - all local).
 ## Project layout
 
 ```
-app.py             Flask server + API routes (chat, summarize, status,
+app.py             Flask server + API routes (chat for owner + guests,
+                   code builder, image generation, summarize, status,
                    file upload bridge, access check, model list)
 requirements.txt   Python dependencies
 frontend/          React source (Vite build -> ../dist)
 ```
 
-Not ported from my earlier Vercel version: the paid media experiments
-(image/video generation) - they need extra cloud accounts and I did not
-want secrets-heavy code in this repo. The routes above cover the whole
-daily-use app.
+Image generation goes through a free Cloudflare Workers AI account and
+the code builder through the same free Gemini key - both need their own
+free accounts in .env (see the example above) and stay off until you add
+them. Paid video stays locked on purpose; the free short clips go
+straight from the browser to the public LTX demo, so no key for that
+either. Guest limits are simple in-memory counters (one small server),
+with the same daily numbers the site shows.

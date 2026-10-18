@@ -1,0 +1,6 @@
+import React,{lazy}from'react';import{retryToolImport}from'../lib/tool-recovery.js';
+// Browsers cache failed module URLs as well as React.lazy's rejected record.
+// Retry only this build's literal, same-origin assets URL, never an error's URL.
+function freshModuleURL(importer,attempt){const match=String(importer).match(/import\(\s*["']([^"']+)["']\s*\)/);if(!match)return null;const url=new URL(match[1],import.meta.url);if(url.origin!==location.origin||!url.pathname.startsWith('/assets/')||!url.pathname.endsWith('.js'))return null;url.searchParams.set('apex_retry',String(attempt));return url.href;}
+const failedRecords=new Set();export function resetFailedTools(){for(const reset of failedRecords)reset();failedRecords.clear()}
+export default function recoverableLazy(importer){let Component=null,requests=0;const reset=()=>{Component=null};return function RecoverableTool(props){if(!Component){Component=lazy(()=>retryToolImport(()=>{const attempt=requests++;const url=attempt?freshModuleURL(importer,attempt):null;return url?import(/* @vite-ignore */ url):importer()}).catch(error=>{failedRecords.add(reset);throw error}))}return <Component {...props}/>}}

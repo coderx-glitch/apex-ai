@@ -1,0 +1,1 @@
+Original DM Sans and Manrope webfont files served locally by APEX,unmodified. Font family names retained. Each font remains under SIL OFL1.1; corresponding complete copyright/license text is included. Files originally obtained from the Google Fonts CSS API; exact sourceURLs,byte sizes andSHA256hashes are inSOURCES.json. No endorsement by the font authors is claimed.

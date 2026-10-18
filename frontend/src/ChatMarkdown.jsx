@@ -1,0 +1,4 @@
+import React from'react';import Markdown from'./MarkdownText.jsx';
+function imageURL(value){try{const url=new URL(value);return['http:','https:'].includes(url.protocol)&&!url.username&&!url.password?url.href:''}catch{return''}}
+const components={img:({src,alt})=>{const url=imageURL(src);return <span className="chat-image-review"><span>Image hidden. No image request sent.{alt?' '+alt:''}</span>{url?<a href={url} target="_blank" rel="noopener noreferrer" referrerPolicy="no-referrer">Open image: {url}</a>:<span>Image URL is not a supported HTTP(S) address.</span>}</span>},a:({href,children})=>href?<a href={href} target="_blank" rel="noopener noreferrer" referrerPolicy="no-referrer">{children}</a>:<span>{children}</span>};
+export default React.memo(function ChatMarkdown({children}){return <Markdown components={components}>{children}</Markdown>});

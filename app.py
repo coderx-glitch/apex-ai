@@ -252,5 +252,38 @@ def summarize():
     return jsonify(summary="".join(p.get("text", "") for p in parts))
 
 
+@app.get("/api/access")
+def access():
+    # the front end pings this to check the owner code still works
+    if owner_ok():
+        return jsonify(accepted=True)
+    return jsonify(accepted=False,
+                   error="Code not accepted. Enter your latest owner access code."), 401
+
+
+@app.get("/api/auth-config")
+def auth_config():
+    return jsonify(auth={"providers": {"google": False, "github": False,
+                                       "microsoft": False, "yahoo": False},
+                         "email": False},
+                   guest={"enabled": bool(GEMINI_KEY),
+                          "reason": "Shared demo allowance, subject to provider free quota."})
+
+
+@app.get("/api/models")
+def models():
+    if not owner_ok():
+        return jsonify(error="Owner access required"), 401
+    if not GEMINI_KEY:
+        return jsonify(error="Gemini is not configured."), 503
+    r = requests.get(f"{GEMINI_BASE}/models", params={"key": GEMINI_KEY,
+                     "pageSize": 100}, timeout=30)
+    if r.status_code != 200:
+        return jsonify(status=r.status_code, reason="Provider request failed"), 502
+    usable = [m["name"] for m in r.json().get("models", [])
+              if "generateContent" in m.get("supportedGenerationMethods", [])]
+    return jsonify(models=usable)
+
+
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)), debug=True)

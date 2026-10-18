@@ -10,6 +10,7 @@ export default defineConfig({
     rollupOptions: {
       output: {
         manualChunks(id) {
+          if (id.endsWith('/src/auth-runtime.js')) return 'auth-runtime';
           if (!id.includes('node_modules')) return undefined;
           if (id.includes('/react-dom/') || id.includes('/react/') || id.includes('/scheduler/')) {
             return 'vendor-react';

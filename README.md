@@ -30,6 +30,12 @@ to leak because there is no cloud account database.
    ```
    GEMINI_API_KEY=paste-your-free-key-from-aistudio.google.com
    APEX_ACCESS_TOKEN=make-up-a-long-owner-code
+   # optional, only for AI images (free account at cloudflare.com):
+   CLOUDFLARE_ACCOUNT_ID=
+   CLOUDFLARE_API_TOKEN=
+   CLOUDFLARE_FREE_TIER_CONFIRMED=true
+   APEX_GUEST_IMAGE_ENABLED=true
+   APEX_GEMINI_FREE_CONFIRMED=true
    ```
 5. `python app.py` and open http://localhost:5000
 

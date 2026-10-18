@@ -26,6 +26,23 @@ MAX_CHUNK_B64 = 4_200_000
 # basic per-IP bucket so one visitor can't hammer the free quota
 _calls = {}
 
+# guest big-file allowance: 2 files per visitor per day, 20 total per day.
+# in-memory is fine here - this project runs as one small server.
+_uploads = {}
+
+def guest_upload_allowed():
+    ip = request.headers.get("X-Forwarded-For", request.remote_addr or "?")
+    ip = ip.split(",")[0].strip()
+    today = time.strftime("%Y-%m-%d")
+    day, count, total = _uploads.get("state", (today, {}, 0))
+    if day != today:
+        day, count, total = today, {}, 0
+    if count.get(ip, 0) >= 2 or total >= 20:
+        return False
+    count[ip] = count.get(ip, 0) + 1
+    _uploads["state"] = (day, count, total + 1)
+    return True
+
 
 def owner_ok():
     auth = request.headers.get("Authorization", "")
@@ -137,12 +154,18 @@ def chat():
 @app.post("/api/file-upload")
 def file_upload():
     # bridge to Google's resumable file upload, owner only
-    if not owner_ok():
-        return jsonify(error="Large-file AI upload needs the owner sign-in."), 403
-    if not GEMINI_KEY:
-        return jsonify(error="Gemini is not configured."), 503
     body = request.get_json(silent=True) or {}
     action = body.get("action")
+    if not owner_ok():
+        # guests get a smaller file and a simple daily allowance
+        if action == "start":
+            size = body.get("size") or 0
+            if size > 100 * 1024 * 1024:
+                return jsonify(error="Guest large-file limit: 100 MB per file."), 400
+            if not guest_upload_allowed():
+                return jsonify(error="Guest large-file allowance reached for today."), 429
+    if not GEMINI_KEY:
+        return jsonify(error="Gemini is not configured."), 503
 
     if action == "start":
         if rate_limited():
@@ -161,7 +184,13 @@ def file_upload():
             timeout=30)
         if r.status_code != 200:
             return jsonify(error="Google refused the upload start."), 502
-        return jsonify(uploadUrl=r.headers.get("x-goog-upload-url"))
+        upload_url = r.headers.get("x-goog-upload-url", "")
+        # Google echoes our API key into the session URL - strip it before
+        # handing the URL to the browser, re-added server-side per chunk.
+        from urllib.parse import urlparse, parse_qsl, urlencode, urlunparse
+        parts = urlparse(upload_url)
+        qs = [(k, v) for k, v in parse_qsl(parts.query) if k != "key"]
+        return jsonify(uploadUrl=urlunparse(parts._replace(query=urlencode(qs))))
 
     if action == "chunk":
         upload_url = str(body.get("uploadUrl", ""))
@@ -173,7 +202,8 @@ def file_upload():
         import base64
         blob = base64.b64decode(data)
         cmd = "upload, finalize" if body.get("final") else "upload"
-        r = requests.put(upload_url, data=blob, timeout=60, headers={
+        sep = "&" if "?" in upload_url else "?"
+        r = requests.put(upload_url + sep + "key=" + GEMINI_KEY, data=blob, timeout=60, headers={
             "Content-Length": str(len(blob)),
             "X-Goog-Upload-Offset": str(body.get("offset", 0)),
             "X-Goog-Upload-Command": cmd})
@@ -197,6 +227,29 @@ def file_upload():
                        mime=f.get("mimeType"))
 
     return jsonify(error="Unknown upload action."), 400
+
+
+@app.post("/api/summarize")
+def summarize():
+    # rolls older chat history into a short checkpoint so long
+    # conversations stay inside the free context window
+    if not owner_ok():
+        return jsonify(error="Owner access required"), 401
+    if not GEMINI_KEY:
+        return jsonify(error="gemini is not configured."), 503
+    text = str((request.get_json(silent=True) or {}).get("text", ""))[:20000]
+    model = os.environ.get("GEMINI_FAST_MODEL", "gemini-2.5-flash-lite")
+    r = requests.post(
+        f"{GEMINI_BASE}/models/{model}:generateContent",
+        params={"key": GEMINI_KEY}, timeout=50,
+        json={"contents": [{"role": "user", "parts": [{"text":
+              "Compress this chat history into 10 short factual lines. "
+              "Keep names, decisions and open tasks.\n\n" + text}]}],
+              "generationConfig": {"maxOutputTokens": 600}})
+    if r.status_code != 200:
+        return jsonify(error="Context checkpoint failed. Retry later."), 502
+    parts = r.json()["candidates"][0]["content"]["parts"]
+    return jsonify(summary="".join(p.get("text", "") for p in parts))
 
 
 if __name__ == "__main__":

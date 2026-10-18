@@ -1,7 +1,7 @@
 export const NAV_GROUPS=[
 {id:'start',title:'Start here',detail:'Your overview and conversations',tools:[
 {name:'Home',description:'Overview, recent work and the demo guide.',keywords:'dashboard counts sample files demo checklist'},
-{name:'Chat',description:'Ask Gemini or prepare a reviewed prompt.',keywords:'assistant questions reasoning messages'},
+{name:'Chat',description:'Ask APEX AI or prepare a reviewed prompt.',keywords:'assistant questions reasoning messages'},
 {name:'Conversations',description:'Find, pin, rename or archive saved chats.',keywords:'history branches pinned archive'},
 {name:'Search',description:'Search saved local workspace content.',keywords:'global workspace notes tasks messages'}]},
 {id:'organize',title:'Plan & organize',detail:'Your work, notes and context',tools:[

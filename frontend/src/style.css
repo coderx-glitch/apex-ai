@@ -510,3 +510,5 @@ html[data-reading-motion="reduce"] .pointer-accent{display:none!important}
 
 .control-dock.active .controls-stop{position:sticky;bottom:-7px;display:flex;width:100%;background:var(--panel);border-top:1px solid var(--border);z-index:2;min-height:44px;box-shadow:0 -5px 10px var(--panel)}
 @media(max-width:700px){.control-dock:has(.hand-scroll-settings) .hand-camera-frame{height:110px}.control-dock:has(.hand-scroll-settings) .hand-camera-frame.preview-hidden{height:0}}
+
+.quick-actions{display:flex;gap:8px;margin:12px 0 2px;flex-wrap:wrap}.quick-actions>button{flex:1;min-width:120px;display:flex;align-items:center;justify-content:center;gap:7px;padding:10px 8px;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--ink);font-weight:600;font-size:13px;cursor:pointer}.quick-actions>button:hover{border-color:var(--accent);color:var(--accent)}

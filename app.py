@@ -130,32 +130,49 @@ def chat():
         if part:
             contents[-1]["parts"].append(part)
 
-    url = f"{GEMINI_BASE}/models/{model}:streamGenerateContent"
+    backup = os.environ.get("GEMINI_REASONING_MODEL", "gemini-2.5-flash")
     params = {"key": GEMINI_KEY, "alt": "sse"}
     payload = {"contents": contents,
                "generationConfig": {"maxOutputTokens": 4096}}
 
     def stream():
-        yield sse({"type": "model", "model": model, "provider": "gemini"})
-        try:
-            with requests.post(url, params=params, json=payload,
-                               stream=True, timeout=60) as r:
-                if r.status_code != 200:
-                    yield sse({"type": "error",
-                               "message": "AI service usage limit reached. Try again later."})
-                    return
-                for line in r.iter_lines(decode_unicode=True):
-                    if not line or not line.startswith("data: "):
+        # free-tier limits are per model, so a full main model falls back to the backup once
+        tried = []
+        for current in [model] + ([backup] if backup != model else []):
+            tried.append(current)
+            if len(tried) > 1:
+                yield sse({"type": "retry", "model": tried[-2],
+                           "message": "Main free model hit its limit. Trying the backup free model."})
+            yield sse({"type": "model", "model": current, "provider": "gemini"})
+            url = f"{GEMINI_BASE}/models/{current}:streamGenerateContent"
+            started = False
+            try:
+                with requests.post(url, params=params, json=payload,
+                                   stream=True, timeout=60) as r:
+                    if r.status_code in (429, 500, 502, 503) and not started:
                         continue
-                    chunk = json.loads(line[6:])
-                    for cand in chunk.get("candidates", []):
-                        for part in cand.get("content", {}).get("parts", []):
-                            if part.get("text"):
-                                yield sse({"type": "delta", "text": part["text"]})
-        except requests.RequestException:
-            yield sse({"type": "error", "message": "Provider unavailable. Try again."})
+                    if r.status_code != 200:
+                        yield sse({"type": "error",
+                                   "message": "AI service usage limit reached. Try again later."})
+                        return
+                    for line in r.iter_lines(decode_unicode=True):
+                        if not line or not line.startswith("data: "):
+                            continue
+                        chunk = json.loads(line[6:])
+                        for cand in chunk.get("candidates", []):
+                            for part in cand.get("content", {}).get("parts", []):
+                                if part.get("text"):
+                                    started = True
+                                    yield sse({"type": "delta", "text": part["text"]})
+            except requests.RequestException:
+                if not started:
+                    continue
+                yield sse({"type": "error", "message": "Provider unavailable. Try again."})
+                return
+            yield sse({"type": "done"})
             return
-        yield sse({"type": "done"})
+        yield sse({"type": "error",
+                   "message": "AI service usage limit reached on both free models. Try again later."})
 
     return Response(stream(), mimetype="text/event-stream",
                     headers={"Cache-Control": "no-store", "X-Accel-Buffering": "no"})

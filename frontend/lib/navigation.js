@@ -14,7 +14,8 @@ export const NAV_GROUPS=[
 {name:'Documents',description:'Read local PDF text or scan printed English text from an image.',keywords:'PDF reader upload pages extract document OCR scan image text local tesseract'},
 {name:'Code',description:'Four-file static web apps, source editor and sandbox preview.',keywords:'HTML CSS JS coding build app ZIP',limit:'Static frontend only'},
 {name:'Media',description:'APEX image and motion studios, local edits and slideshows.',keywords:'image video slideshow crop resize art LTX FLUX',limit:'Public AI demos need consent and availability'},
-{name:'Converters',description:'Convert images, PDFs and short audio/video files locally.',keywords:'JPG PNG WEBP PDF merge extract MP3 WAV MP4 WEBM audio converter'}]},
+{name:'Converters',description:'Convert images, PDFs and short audio/video files locally.',keywords:'JPG PNG WEBP PDF merge extract MP3 WAV MP4 WEBM audio converter'},
+{name:'Slides',description:'Turn your outline into an editable .pptx on this device.',keywords:'ppt pptx presentation slides deck powerpoint maker',limit:'You write the content'}]},
 {id:'play',title:'Play & interact',detail:'Games and optional device inputs',tools:[
 {name:'Games',description:'52 local games, puzzles, bots and cosmetic rewards.',keywords:'chess pong breaker flight flappy bird fruit slice bubbles moles tower stack keeper orbit maze hoop rail train lasso loop mouth head tilt iris gaze constellation dock arcade game hand play',limit:'No multiplayer'},
 {name:'Controls',description:'Opt-in hand, face games, eye and browser speech controls.',keywords:'gesture hand face mouth head tilt eye camera voice microphone speech accessibility',limit:'Human tracking accuracy not validated'}]},

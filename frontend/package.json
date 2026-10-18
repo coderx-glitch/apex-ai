@@ -8,7 +8,9 @@
     "build": "vite build && node setup/check-public-secrets.mjs",
     "test": "node --test tests/*.test.js",
     "check:public": "node setup/check-public-secrets.mjs",
-    "test:staged": "node setup/verify-staged-release.mjs"
+    "test:staged": "node setup/verify-staged-release.mjs",
+    "test:ui": "node tests/run-ui.mjs",
+    "test:ui:all": "node tests/run-ui.mjs --all"
   },
   "dependencies": {
     "@ffmpeg/core": "^0.12.10",
@@ -24,6 +26,7 @@
     "lucide-react": "^0.468.0",
     "pdf-lib": "^1.17.1",
     "pdfjs-dist": "^6.4.299",
+    "pptxgenjs": "^4.0.1",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-markdown": "^10.0.0",

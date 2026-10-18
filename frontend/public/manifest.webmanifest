@@ -1,4 +1,6 @@
 {
+  "id": "/",
+  "scope": "/",
   "name": "APEX AI - project workbench",
   "short_name": "APEX AI",
   "start_url": "/",

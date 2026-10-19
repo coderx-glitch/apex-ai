@@ -10,7 +10,7 @@ export const NAV_GROUPS=[
 {name:'Notes',description:'Markdown notes, expanded editor, snapshots and flashcard practice.',keywords:'study flashcards Q answer markdown tags history note task'},
 {name:'Memory',description:'Review, pause, import or remove local memory.',keywords:'preferences facts context expiration conflict privacy backup'}]},
 {id:'create',title:'Research & create',detail:'Evidence, documents and outputs',tools:[
-{name:'Research',description:'Wikipedia EN/HI lookup and reviewed source records.',keywords:'wikipedia hindi english bibliography sources evidence comparison live search',limit:'Wikipedia only, not whole-web search'},
+
 {name:'Documents',description:'Read local PDF text or scan printed English text from an image.',keywords:'PDF reader upload pages extract document OCR scan image text local tesseract'},
 {name:'Code',description:'Four-file static web apps, source editor and sandbox preview.',keywords:'HTML CSS JS coding build app ZIP',limit:'Static frontend only'},
 {name:'Media',description:'APEX image and motion studios, local edits and slideshows.',keywords:'image video slideshow crop resize art LTX FLUX',limit:'Public AI demos need consent and availability'},

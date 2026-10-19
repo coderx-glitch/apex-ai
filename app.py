@@ -100,6 +100,10 @@ def chat():
         return jsonify(error="gemini is not configured. Add a server-side API key."), 503
 
     body = request.get_json(silent=True) or {}
+    if body.get("mode") == "research" and os.environ.get("APEX_RESEARCH_FREE_CONFIRMED") != "true":
+        return jsonify(error="Live web research is locked: free Google Search entitlement is not verified. "
+                             "No search request was sent. Use source notes or upload source text, "
+                             "then ask in Assistant mode."), 403
     if owner_ok():
         messages = body.get("messages") or []
         if not messages or len(messages) > 60:
@@ -114,7 +118,9 @@ def chat():
             return jsonify(error=blocked, retryAfter=retry), 429
         messages = body["messages"]
 
-    model = os.environ.get("GEMINI_FAST_MODEL", "gemini-2.5-flash-lite")
+    fast = os.environ.get("GEMINI_FAST_MODEL", "gemini-3.5-flash-lite")
+    deep = os.environ.get("GEMINI_REASONING_MODEL", "gemini-3.8-flash")
+    model, backup_model = (deep, fast) if body.get("mode") == "reason" else (fast, deep)
     contents = []
     for m in messages:
         role = "model" if m.get("role") == "assistant" else "user"
@@ -130,7 +136,7 @@ def chat():
         if part:
             contents[-1]["parts"].append(part)
 
-    backup = os.environ.get("GEMINI_REASONING_MODEL", "gemini-2.5-flash")
+    backup = backup_model
     params = {"key": GEMINI_KEY, "alt": "sse"}
     payload = {"contents": contents,
                "generationConfig": {"maxOutputTokens": 4096}}
@@ -265,7 +271,7 @@ def summarize():
     if not GEMINI_KEY:
         return jsonify(error="gemini is not configured."), 503
     text = str((request.get_json(silent=True) or {}).get("text", ""))[:20000]
-    model = os.environ.get("GEMINI_FAST_MODEL", "gemini-2.5-flash-lite")
+    model = os.environ.get("GEMINI_FAST_MODEL", "gemini-3.5-flash-lite")
     r = requests.post(
         f"{GEMINI_BASE}/models/{model}:generateContent",
         params={"key": GEMINI_KEY}, timeout=50,
@@ -341,10 +347,10 @@ def _env_int(name, default):
 
 def guest_chat_problem(body):
     # same limits as the hosted demo: short context, one small image or one Files handle
-    if body.get("provider") not in (None, "gemini") or body.get("mode") not in (None, "chat"):
-        return "Guest demo supports Assistant chat only. No research, model switching or shared memory."
+    if body.get("provider") not in (None, "gemini") or body.get("mode") not in (None, "chat", "research", "reason"):
+        return "Guest demo supports Assistant, Research and Reasoning chat. No model switching, checkpoint or shared memory."
     if body.get("summary") or body.get("memory"):
-        return "Guest demo supports Assistant chat only. No research, model switching or shared memory."
+        return "Guest demo supports Assistant, Research and Reasoning chat. No model switching, checkpoint or shared memory."
     msgs = body.get("messages")
     if not isinstance(msgs, list) or not msgs or len(msgs) > 8:
         return "Guest demo allows the latest 8 messages. Start a new conversation for a shorter context."
@@ -436,7 +442,7 @@ def code_build():
         return jsonify(error="Free code model verification is required. No request sent."), 503
     if not GEMINI_KEY:
         return jsonify(error="Code generation is not configured."), 503
-    model = os.environ.get("GEMINI_FAST_MODEL", "gemini-2.5-flash-lite")
+    model = os.environ.get("GEMINI_FAST_MODEL", "gemini-3.5-flash-lite")
     payload = {"contents": [{"role": "user", "parts": [{"text": json.dumps(payload_in)}]}],
                "systemInstruction": {"parts": [{"text": CODE_SYSTEM}]},
                "generationConfig": {"responseMimeType": "application/json",

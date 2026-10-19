@@ -3,6 +3,7 @@
 # Run:  python app.py   (needs GEMINI_API_KEY and APEX_ACCESS_TOKEN in .env)
 
 import os
+import re
 import time
 import json
 import hmac
@@ -332,7 +333,25 @@ CODE_SYSTEM = ("You build small static frontend web apps. Return only a JSON pro
     "edits without discarding other features. Explain any unsupported requirements in README. Do not "
     "claim testing, deployment or external actions. No markdown fences. Keep total output under"
     "12,000characters.")
-CODE_FILES = {"index.html", "style.css", "app.js", "README.md"}
+CODE_EXTENSIONS = (".html", ".css", ".js", ".py", ".java", ".md", ".txt", ".json", ".csv")
+CODE_KINDS = ("web", "python", "java", "mixed")
+MAX_CODE_FILES, MAX_CODE_FILE_CHARS, MAX_CODE_TOTAL_CHARS = 20, 40000, 200000
+PLAN_SYSTEM = ("You design small software projects for a personal learning workbench. Return only "
+    "JSON {name,kind,files:[{path,purpose}],notes}. kind is one of web, python, java, mixed. "
+    "2 to 12 files. web means static frontend only (HTML, CSS, JavaScript; no backend, accounts, "
+    "payments, CDNs or network calls) and must include index.html. python means standard-library "
+    "Python 3 that runs in a browser WASM runtime: no pip installs, no network, no files outside "
+    "the project. java means Java 17 source that cannot run in the browser; say so in notes. Paths "
+    "use lowercase letters, digits, -, _ and / with extensions .html .css .js .py .java .md .txt "
+    ".json .csv. Keep the whole project under 150,000 characters. Always include README.md with "
+    "honest setup and limits. No secrets or real user data.")
+FILE_SYSTEM = ("You write one complete file for a small software project. Input JSON is "
+    "{instruction, plan, path}. Return only JSON {path, content} with path exactly as requested. "
+    "Complete, compact, working source. web files stay static frontend only: no CDNs, network, "
+    "accounts or payments. python files use the standard library only: no pip, network or files "
+    "outside the project. java files are Java 17 source and are not runnable in the browser. Plain "
+    "code in content, no markdown fences, no secrets, no real user data. Keep content under 30,000 "
+    "characters. Do not claim testing, deployment or external actions.")
 
 # demo allowance buckets, one per feature family. in-memory like the upload one.
 _demo = {"chat": {}, "image": {}}
@@ -400,22 +419,71 @@ def demo_reserve(kind):
     return None, None
 
 
+def valid_code_path(path):
+    if path == "README.md":
+        return True
+    if not isinstance(path, str) or len(path) > 80:
+        return False
+    if not re.fullmatch(r"[a-z0-9][a-z0-9/_-]*\.[a-z0-9]+", path):
+        return False
+    if ".." in path or path.startswith("/") or "//" in path:
+        return False
+    return path.endswith(CODE_EXTENSIONS)
+
+
 def check_project(value):
     # whitelist check for AI-built projects, same shape the front end expects
     if not isinstance(value, dict) or not isinstance(value.get("files"), list) \
-            or not value["files"] or len(value["files"]) > 4:
-        raise ValueError("Project must contain up to 4 supported files.")
+            or not value["files"] or len(value["files"]) > MAX_CODE_FILES:
+        raise ValueError("Project must contain 1 to 20 supported files.")
     seen, size, files = set(), 0, []
     for f in value["files"]:
-        if f.get("path") not in CODE_FILES or f["path"] in seen \
-                or not isinstance(f.get("content"), str) or len(f["content"]) > 40000:
+        if not valid_code_path(f.get("path")) or f["path"] in seen \
+                or not isinstance(f.get("content"), str) or len(f["content"]) > MAX_CODE_FILE_CHARS:
             raise ValueError("Unsupported, duplicate or oversized project file.")
         seen.add(f["path"])
         size += len(f["content"])
         files.append({"path": f["path"], "content": f["content"]})
-    if "index.html" not in seen or size > 100000:
-        raise ValueError("Project needs index.html and a 100 KB total limit.")
-    return {"name": str(value.get("name") or "My web app")[:80], "files": files}
+    kind = value.get("kind") if value.get("kind") in CODE_KINDS else "web"
+    if kind == "web" and "index.html" not in seen:
+        raise ValueError("A web project needs index.html.")
+    if size > MAX_CODE_TOTAL_CHARS:
+        raise ValueError("Project is over the 200KB total limit.")
+    return {"name": str(value.get("name") or "My project")[:80], "kind": kind, "files": files}
+
+
+def check_plan(value):
+    # a plan is paths + purposes only, no code yet
+    if not isinstance(value, dict) or not isinstance(value.get("files"), list) \
+            or not value["files"] or len(value["files"]) > MAX_CODE_FILES:
+        raise ValueError("Plan must list 1 to 20 files.")
+    seen, files = set(), []
+    for f in value["files"]:
+        if not valid_code_path(f.get("path")) or f["path"] in seen:
+            raise ValueError("Unsupported or duplicate path in plan.")
+        seen.add(f["path"])
+        files.append({"path": f["path"], "purpose": str(f.get("purpose") or "")[:200]})
+    kind = value.get("kind") if value.get("kind") in CODE_KINDS else "web"
+    if kind == "web" and "index.html" not in seen:
+        raise ValueError("A web app plan needs index.html.")
+    return {"name": str(value.get("name") or "My project")[:80], "kind": kind,
+            "files": files, "notes": str(value.get("notes") or "")[:500]}
+
+
+def check_builder_action(body):
+    action = body.get("action")
+    if action not in ("plan", "file"):
+        raise ValueError("Unknown builder action.")
+    instruction = body.get("instruction")
+    if not isinstance(instruction, str) or not instruction.strip() or len(instruction) > 2000:
+        raise ValueError("Describe your app or edit in 1 to 2,000 characters.")
+    if action == "plan":
+        return {"action": action, "instruction": instruction.strip()}
+    plan = check_plan(body.get("plan"))
+    path = body.get("path")
+    if not any(f["path"] == path for f in plan["files"]):
+        raise ValueError("Choose a file from the approved plan.")
+    return {"action": action, "instruction": instruction.strip(), "plan": plan, "path": path}
 
 
 @app.post("/api/code")
@@ -423,6 +491,63 @@ def code_build():
     if not owner_ok() and request.headers.get("Authorization"):
         return jsonify(error="Owner code not accepted. No build request sent."), 401
     body = request.get_json(silent=True) or {}
+    if body.get("action"):
+        # multi-step builder is owner only: it makes one AI call per file
+        if not owner_ok():
+            return jsonify(error="The multi-step project builder needs owner access. Guests can use the one-request builder."), 403
+        try:
+            job = check_builder_action(body)
+        except ValueError as e:
+            return jsonify(error=str(e)), 400
+        if rate_limited():
+            return jsonify(error="Too many requests. Wait a minute."), 429
+        if os.environ.get("APEX_GEMINI_FREE_CONFIRMED") != "true":
+            return jsonify(error="Free code model verification is required. No request sent."), 503
+        if not GEMINI_KEY:
+            return jsonify(error="Code generation is not configured."), 503
+        if job["action"] == "plan":
+            model = os.environ.get("GEMINI_REASONING_MODEL", "gemini-3.8-flash")
+            payload = {"contents": [{"role": "user", "parts": [{"text": job["instruction"]}]}],
+                       "systemInstruction": {"parts": [{"text": PLAN_SYSTEM}]},
+                       "generationConfig": {"responseMimeType": "application/json",
+                                            "maxOutputTokens": 4096}}
+            try:
+                r = requests.post(f"{GEMINI_BASE}/models/{model}:generateContent",
+                                  params={"key": GEMINI_KEY}, json=payload, timeout=45)
+                if r.status_code != 200:
+                    return jsonify(error="AI service usage limit reached. Try again later.",
+                                   retryAfter=60 if r.status_code == 429 else None), \
+                        (429 if r.status_code == 429 else 502)
+                plan = check_plan(json.loads(r.json()["candidates"][0]["content"]["parts"][0]["text"]))
+            except (ValueError, KeyError, json.JSONDecodeError):
+                return jsonify(error="Could not produce a valid plan. No files generated. No automatic retry."), 502
+            except requests.RequestException:
+                return jsonify(error="Build stopped or timed out. It may have used free quota. No automatic retry."), 504
+            return jsonify(plan=plan, model=model,
+                           notice="Design plan only. No files generated yet. Review the file list before generating.")
+        model = os.environ.get("GEMINI_FAST_MODEL", "gemini-3.5-flash-lite")
+        payload = {"contents": [{"role": "user", "parts": [{"text": json.dumps(
+                       {"instruction": job["instruction"], "plan": job["plan"], "path": job["path"]})}]}],
+                   "systemInstruction": {"parts": [{"text": FILE_SYSTEM}]},
+                   "generationConfig": {"responseMimeType": "application/json",
+                                        "maxOutputTokens": 8192}}
+        try:
+            r = requests.post(f"{GEMINI_BASE}/models/{model}:generateContent",
+                              params={"key": GEMINI_KEY}, json=payload, timeout=45)
+            if r.status_code != 200:
+                return jsonify(error="AI service usage limit reached. Try again later.",
+                               retryAfter=60 if r.status_code == 429 else None), \
+                    (429 if r.status_code == 429 else 502)
+            out = json.loads(r.json()["candidates"][0]["content"]["parts"][0]["text"])
+            if out.get("path") != job["path"] or not isinstance(out.get("content"), str) \
+                    or not out["content"].strip() or len(out["content"]) > 40000:
+                return jsonify(error="Could not produce a complete file. No project changes applied. No automatic retry."), 502
+        except (KeyError, json.JSONDecodeError):
+            return jsonify(error="Could not produce a complete file. No project changes applied. No automatic retry."), 502
+        except requests.RequestException:
+            return jsonify(error="Build stopped or timed out. It may have used free quota. No automatic retry."), 504
+        return jsonify(file={"path": out["path"], "content": out["content"]}, model=model,
+                       notice="One file generated. Not tested or executed. Review before use.")
     instruction = body.get("instruction")
     if not isinstance(instruction, str) or not instruction.strip() or len(instruction) > 2000:
         return jsonify(error="Describe your app or edit in 1 to 2,000 characters."), 400
@@ -430,6 +555,8 @@ def code_build():
     if body.get("project"):
         try:
             payload_in["project"] = check_project(body["project"])
+            if sum(len(f["content"]) for f in payload_in["project"]["files"]) > 14000:
+                raise ValueError("AI edit context is limited to 14,000 characters. Download your current project and make smaller edits locally.")
         except ValueError as e:
             return jsonify(error=str(e)), 400
     if not owner_ok():

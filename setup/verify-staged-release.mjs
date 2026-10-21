@@ -1,0 +1,8 @@
+import{spawnSync}from'node:child_process';import{readdirSync}from'node:fs';
+const live=process.env.BASE;
+const checks=['upload-conversation-ui','upload-enter-ui','upload-read-failure-ui','scan-chat-draft-ui','scan-selection-ui','scan-ui','scan-lifecycle-ui','pdf-upload-ui','document-quality-ui','chat-image-privacy-ui','note-preview-lifecycle-ui','markdown-loading-ui','mobile-navigation-focus-ui','review-dialog-ui','private-boundary-ui','recovery-storage-ui','saved-entry-race-ui','signout-failure-ui','navigation-ui'];
+function run(command,args){const started=Date.now(),result=spawnSync(command,args,{stdio:'inherit',env:process.env});if(result.error)throw result.error;if(result.status!==0)throw Error(command+' '+args.join(' ')+' failed with exit '+result.status);return Math.round((Date.now()-started)/100)/10}
+console.log(live?'Checking live UI at '+live+' with synthetic isolated fixtures. Mocked response tests are labeled individually. This does not deploy.':'Checking local staged source. Vendor assets must already be prepared as README describes. This does not deploy.');
+if(!live){run(process.execPath,['--test',...readdirSync('tests').filter(n=>n.endsWith('.test.js')).map(n=>'tests/'+n)]);run('npm',['run','build'])}
+const results=[];for(const name of checks){console.log('\nCHECK '+name);results.push({check:name,seconds:run(process.execPath,['tests/'+name+'.mjs'])})}
+console.table(results);console.log('Passed '+results.length+' focused '+(live?'live UI':'local UI')+' checks. No deployment, real model generation, or real account sign-in/sign-out was requested. This is not a security audit, human camera-accuracy test, or phone performance benchmark.');

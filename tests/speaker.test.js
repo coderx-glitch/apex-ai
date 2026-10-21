@@ -1,0 +1,2 @@
+import test from 'node:test';import assert from 'node:assert/strict';
+test('speaker claim dedupes same text',async()=>{globalThis.window=globalThis.window||{dispatchEvent(){},addEventListener(){},speechSynthesis:{cancel(){}}};globalThis.CustomEvent=globalThis.CustomEvent||class{constructor(t){this.type=t}};const m=await import('../lib/speaker.js');m.stopSpeech();assert.ok(m.claimSpeech('hello world'));assert.equal(m.claimSpeech('hello world'),null);assert.ok(m.claimSpeech('other'))});

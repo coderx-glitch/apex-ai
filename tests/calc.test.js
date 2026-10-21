@@ -1,0 +1,2 @@
+import test from 'node:test';import assert from 'node:assert/strict';import*as c from '../lib/calc.js';
+test('calc',()=>{assert.equal(c.evaluate('2^10+sqrt(144)'),'1036');assert.equal(c.evaluate('sin(30)*2'),'1');assert.equal(c.evaluate('import x'),null);assert.match(c.percent('what is 15% of 2400'),/= 360/);assert.equal(c.convert('100 c to f'),'100 °C = 212 °F');assert.match(c.convert('5 km to miles'),/3\.10685/);assert.equal(c.convert('5 kg to km'),null);assert.match(c.calcFacts('what is 12.5% of 840?'),/105/);assert.equal(c.calcFacts('tell me a story'),'')});

@@ -1,0 +1,2 @@
+import test from 'node:test';import assert from 'node:assert/strict';import{plainMath as p}from'../lib/plain-math.js';
+test('plain math',()=>{assert.equal(p('is $2^{12} + \\sqrt{256}$ done'),'is 2^12 + sqrt(256) done');assert.equal(p('$2480 \\times 0.175 = 434$'),'2480 × 0.175 = 434');assert.equal(p('$(72 - 32) \\times \\frac{5}{9} \\approx 22.22\\text{ °C}$'),'(72 - 32) × (5)/(9) ≈ 22.22 °C');assert.equal(p('costs $5 and $10 today'),'costs $5 and $10 today');assert.equal(p('`$x$` code'),'`$x$` code')});

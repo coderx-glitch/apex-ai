@@ -1,0 +1,4 @@
+import test from 'node:test';import assert from 'node:assert/strict';import{providerError}from'../lib/provider-errors.js';
+test('quota message friendly',()=>{const e=providerError({status:429,message:'RESOURCE_EXHAUSTED'});assert.equal(e.kind,'quota');assert.match(e.message,/busy right now/);assert.doesNotMatch(e.message,/gemini|billing/i)});
+import{nextQuota}from'../lib/firebase-quota.js';
+test('shared IP gets more per-minute room than one visitor',()=>{const t=new Date('2026-10-22T10:00:10Z');let st=null,ok=0;for(let i=0;i<8;i++){const r=nextQuota(st,{ip:'ip1',visitor:'v'+i},t);if(r.allowed){ok++;st=r.state}}assert.equal(ok,8);const one=(()=>{let s2=null,n=0;for(let i=0;i<5;i++){const r=nextQuota(s2,{ip:'ipx'+i,visitor:'same'},t);if(r.allowed){n++;s2=r.state}}return n})();assert.equal(one,3)});

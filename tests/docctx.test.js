@@ -1,0 +1,2 @@
+import test from 'node:test';import assert from 'node:assert/strict';import{documentContext}from'../lib/document-context.js';
+test('excerpt targets the answer, not stopwords',()=>{const text='Intro filler. '.repeat(200)+'Budget: the total approved budget is Rs 48,500. Team lead: Ananya Rao. Deadline: 14 November 2026.';const out=documentContext([{name:'r.txt',pages:[{page:1,text}]}],'From the attached report: what is the budget, who is the team lead and the deadline?',{maxChars:1500,maxPages:3,pageChars:500});assert.match(out,/48,500/);assert.match(out,/Ananya Rao/)});

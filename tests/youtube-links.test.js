@@ -1,0 +1,2 @@
+import test from 'node:test';import assert from 'node:assert/strict';import fs from 'node:fs';
+test('YouTube links sit beside Instagram on login and in app header',()=>{for(const f of['src/AccessGate.jsx','src/main.jsx']){const s=fs.readFileSync(f,'utf8');assert.match(s,/https:\/\/www\.youtube\.com\/@apexai\.studio" target="_blank" rel="noopener noreferrer"/);assert.match(s,/instagram\.com\/apex\.assistant/)}});

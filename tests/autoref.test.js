@@ -1,0 +1,3 @@
+import test from 'node:test';import assert from 'node:assert/strict';import*as a from '../lib/auto-reference.js';
+test('auto reference gating',async()=>{assert.ok(a.ok('What is the capital of Australia?'));assert.ok(!a.ok('write code for sorting'));assert.ok(!a.ok('hi'));assert.equal(a.topic('Who is Isaac Newton?'),'Isaac Newton');assert.ok(a.matches('Isaac Newton','who is isaac newton'));assert.ok(!a.matches('Gemini (constellation)','mithun rashi'));
+assert.equal(await a.fetch('what is photosynthesis?',async()=>'Wikipedia summary for "Photosynthesis": It is a process. Source: https://x'),'Photosynthesis: It is a process. Source: https://x');assert.equal(await a.fetch('what is photosynthesis?',async()=>'Wikipedia summary for "Mars": red. Source: https://x'),'')});

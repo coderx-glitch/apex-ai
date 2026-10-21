@@ -1,0 +1,1 @@
+import{authConfig}from'../lib/auth-config.js';import{guestStatus}from'../lib/guest.js';export default function handler(req,res){res.setHeader('Cache-Control','no-store');if(req.method!=='GET')return res.status(405).json({error:'GET required'});return res.status(200).json({auth:authConfig(),guest:guestStatus()})}

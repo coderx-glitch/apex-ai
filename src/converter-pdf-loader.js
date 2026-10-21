@@ -1,0 +1,4 @@
+import{retryToolImport}from'../lib/tool-recovery.js';
+const importer=()=>import('./converter-engine.js');let pending,requests=0;
+function retryURL(attempt){const match=String(importer).match(/import\(\s*["']([^"']+)["']\s*\)/);if(!match)return null;const url=new URL(match[1],import.meta.url);if(url.origin!==location.origin||!url.pathname.startsWith('/assets/')||!url.pathname.endsWith('.js'))return null;url.searchParams.set('apex_retry',String(attempt));return url.href}
+export function loadPDFConverter(){if(!pending)pending=retryToolImport(()=>{const attempt=requests++,url=attempt?retryURL(attempt):null;return url?import(/* @vite-ignore */ url):importer()}).catch(e=>{pending=null;throw Error('Local PDF tools could not load. Check your connection and try Convert again. No output was created.')});return pending}

@@ -143,7 +143,7 @@ I want this section to be honest.
 - **Not tested on real hardware.** Automated tests ran in headless Chrome with software rendering. I did not run frame-rate tests on real phones. The microphone and "Hey APEX" voice trigger, Google sign-in with real accounts, image generation, and the paid-plan flows were not part of the automated pass.
 - **No cloud sync.** Data is per browser. Clearing browser data removes it unless exported.
 - **Reminders** work only while the app is open.
-- **Phone app.** It is an installable web app (PWA). It is not published in an app store, and there is no tested Android APK or iOS build in this repository.
+- **Phone app.** The main route is the installable web app (PWA). An Android APK that wraps the live site is on the GitHub Releases page; it is not on the Play Store, its source is not in this repository, and it was not part of the automated tests. There is no iOS build; on iPhone, use Add to Home Screen.
 - **Optional connectors** (Google Calendar, Gmail, GitHub, Notion) exist in the code but are not enabled on the public demo.
 - **Provider names.** The assistant is told not to name the model provider behind it.
 

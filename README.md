@@ -95,7 +95,7 @@ The project is set up for Vercel (`vercel.json`). Add the variables from `.env.e
 - Reminders only fire while the app is open.
 - Notes and chats do not sync between devices.
 - The 3D login look needs a reasonably strong device; weaker phones get a simpler version on purpose.
-- Tested mainly in Chrome. The phone app is an installable web app (PWA), not a store app.
+- Tested mainly in Chrome. The phone app is an installable web app (PWA). An Android APK that wraps the live site is on the Releases page; it is not on the Play Store and its source is not part of this repository.
 
 ## Author
 

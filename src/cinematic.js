@@ -1,12 +1,15 @@
 // Cinematic effects controller. Tiny: 1 overlay, 1 cursor light (desktop only), 1 post-login curtain.
-const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
+let full=false;try{full=(JSON.parse(localStorage.getItem('apex-reading')||'{}').motion||'full')==='full'}catch{full=true}
+const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches&&!full;if(full)document.documentElement.dataset.readingMotion='full';
 if(!reduced){
-const weak=(navigator.hardwareConcurrency||8)<=4||(navigator.deviceMemory||8)<=2;const coarse=matchMedia('(pointer:coarse)').matches,H=document.documentElement.classList;if(weak)H.add('cin-lite');else if(!coarse&&(navigator.hardwareConcurrency||8)>=6)H.add('cin-3d');
+const weak=(navigator.hardwareConcurrency||8)<=2||(navigator.deviceMemory||8)<=1;const coarse=matchMedia('(pointer:coarse)').matches,H=document.documentElement.classList;if(weak)H.add('cin-lite');else if(!coarse&&(navigator.hardwareConcurrency||8)>=6)H.add('cin-3d');
 const el=(c,h)=>{const d=document.createElement('div');d.className=c;if(h)d.innerHTML=h;d.setAttribute('aria-hidden','true');document.body.appendChild(d);return d};
 const start=()=>{
  el('cin-fx','<i class="s1"></i><i class="s2"></i><i class="s3"></i><i class="flare"></i>');
   
  const probe=()=>{if(!H.contains('cin-3d')||window.__cinNoProbe)return;let n=0,t0=performance.now();const f=x=>{n++;if(n<45)requestAnimationFrame(f);else if((x-t0)/n>34){H.remove('cin-3d');H.add('cin-lite');document.querySelector('.cin-glass')?.remove()}};requestAnimationFrame(f)};
+ if(matchMedia('(hover:hover) and (pointer:fine)').matches&&!weak){const c=el('cin-cursor');let x=0,y=0,q=false;addEventListener('pointermove',e=>{x=e.clientX;y=e.clientY;c.classList.add('on');if(!q){q=true;requestAnimationFrame(()=>{c.style.transform='translate3d('+x+'px,'+y+'px,0)';q=false})}},{passive:true});document.addEventListener('pointerleave',()=>c.classList.remove('on'))}
+ if(matchMedia('(pointer:coarse)').matches){const g=el('cin-finger');let fx=0,fy=0,fq=false;const mv=()=>{fq=false;g.style.transform='translate3d('+fx+'px,'+fy+'px,0)'};addEventListener('pointerdown',e=>{if(e.pointerType==='mouse')return;fx=e.clientX;fy=e.clientY;g.classList.add('on');mv();const r=el('cin-tap');r.style.transform='translate3d('+fx+'px,'+fy+'px,0)';r.innerHTML='<i></i>';setTimeout(()=>r.remove(),700)},{passive:true});addEventListener('pointermove',e=>{if(e.pointerType==='mouse'||!g.classList.contains('on'))return;fx=e.clientX;fy=e.clientY;if(!fq){fq=true;requestAnimationFrame(mv)}},{passive:true});const off=()=>setTimeout(()=>g.classList.remove('on'),160);addEventListener('pointerup',off,{passive:true});addEventListener('pointercancel',off,{passive:true})}
  let glass=null,tq=false,tev;const tilt=e=>{tev=e;if(tq)return;tq=true;requestAnimationFrame(()=>{tq=false;const card=document.querySelector('.access-card'),st=document.querySelector('.access-story');if(!card)return;const nx=tev.clientX/innerWidth-.5,ny=tev.clientY/innerHeight-.5;card.style.setProperty('--ry',(-3+nx*7).toFixed(2)+'deg');card.style.setProperty('--rx',(-ny*5).toFixed(2)+'deg');if(st){st.style.setProperty('--px',(-nx*12).toFixed(1)+'px');st.style.setProperty('--py',(-ny*7).toFixed(1)+'px')}})};
  const intro=()=>{if(H.contains('cin-3d')){glass=el('cin-glass','<i class="g1"></i><i class="g2"></i><i class="g3"></i>');addEventListener('pointermove',tilt,{passive:true});setTimeout(probe,2200)};const bb=el('cin-bars');let sw;if(!weak)sw=el('cin-sweep');setTimeout(()=>{bb.remove();sw&&sw.remove()},3600)};
 

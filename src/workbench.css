@@ -83,13 +83,13 @@ input,textarea,select{border-radius:4px}
 @keyframes orb-breathe{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
 @keyframes orb-spin{to{transform:rotate(360deg)}}
 @keyframes orb-bar{0%,100%{transform:scaleY(.35)}50%{transform:scaleY(1.5)}}
-@media(prefers-reduced-motion:reduce){.orb-ring,.orb-wave i,.voice-overlay.listening .orb-core,.voice-overlay.speaking .orb-core{animation:none}}
+@media(prefers-reduced-motion:reduce){html:not([data-reading-motion=full]) .orb-ring,html:not([data-reading-motion=full]) .orb-wave i,html:not([data-reading-motion=full]) .voice-overlay.listening .orb-core,html:not([data-reading-motion=full]) .voice-overlay.speaking .orb-core{animation:none}}
 .login-rays{position:fixed;inset:-20%;z-index:0;pointer-events:none;opacity:.55;mix-blend-mode:screen;background:conic-gradient(from 200deg at 52% 48%,transparent 0deg,#cdff5a22 14deg,transparent 34deg,transparent 150deg,#bd9afa26 170deg,transparent 196deg,transparent 280deg,#9adfeb1c 300deg,transparent 322deg);filter:blur(26px)}
 .login-rays.on{animation:login-rays-spin 70s linear infinite}
 @keyframes login-rays-spin{to{transform:rotate(360deg)}}
 .login-bloom{position:fixed;left:30%;top:50%;width:min(95vw,860px);height:min(95vw,860px);transform:translate(-50%,-50%);z-index:0;pointer-events:none;background:radial-gradient(circle,#cdff5a2e 0%,#bd9afa14 38%,transparent 66%);animation:login-bloom-pulse 6s ease-in-out infinite}
 @keyframes login-bloom-pulse{50%{opacity:.6;transform:translate(-50%,-50%) scale(1.06)}}
-@media(prefers-reduced-motion:reduce){.login-bloom,.login-rays.on{animation:none}}
+@media(prefers-reduced-motion:reduce){html:not([data-reading-motion=full]) .login-bloom,html:not([data-reading-motion=full]) .login-rays.on{animation:none}}
 .access-shell,.access-shell *{-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none}
 .access-shell input,.access-shell textarea{-webkit-user-select:text;user-select:text;-webkit-touch-callout:default}
 .access-shell ::selection{background:transparent}.access-shell input::selection,.access-shell textarea::selection{background:#cdff5a66}
@@ -99,7 +99,7 @@ input,textarea,select{border-radius:4px}
 html[data-theme=cinema]{background:#0a0c14}html[data-theme=cinema] body{background:transparent}
 html[data-theme=cinema] .app,html[data-theme=cinema] .app>main{background:transparent}
 html[data-theme=cinema] .sidebar{background:#070910cc;backdrop-filter:blur(14px)}
-@media(prefers-reduced-motion:reduce){.theme-bloom{animation:none}}
+@media(prefers-reduced-motion:reduce){html:not([data-reading-motion=full]) .theme-bloom{animation:none}}
 .access-shell{position:relative}
 .access-story{position:relative;z-index:1}
 .access-story::before{content:"";position:absolute;inset:-60px -20px -60px -90px;z-index:-1;pointer-events:none;border-radius:40px;background:radial-gradient(closest-side at 50% 50%,#06080ff0 0%,#06080fe6 55%,#06080f99 80%,transparent 100%)}
@@ -131,6 +131,6 @@ html[data-theme=cinema] :is(.note-tools,.task-extra-tools,.project-boundary,.pro
 @keyframes pg-fade{from{opacity:0}}
 @keyframes pg-rise{from{opacity:0;transform:translateY(22px);filter:blur(8px)}}
 @keyframes pg-sheen{to{background-position:-100% 0}}
-@media(prefers-reduced-motion:reduce){.plan-greet,.plan-greet-hello,.plan-greet-welcome{animation:none}}
+@media(prefers-reduced-motion:reduce){html:not([data-reading-motion=full]) .plan-greet,html:not([data-reading-motion=full]) .plan-greet-hello,html:not([data-reading-motion=full]) .plan-greet-welcome{animation:none}}
 /* Phone login: make the 3D background clearly visible (laptop untouched). */
 @media(max-width:700px){.login-bloom{left:50%;top:26%;width:130vw;height:130vw;background:radial-gradient(circle,#cdff5a52 0%,#bd9afa33 40%,transparent 68%)}.login-rays{opacity:.9}.login-film-shade{background:linear-gradient(180deg,#090b1544 0%,#090b1522 35%,#090b1599 100%)}.access-card{background:#141522a8!important;backdrop-filter:blur(10px)!important}}

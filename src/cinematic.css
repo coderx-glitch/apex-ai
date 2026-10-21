@@ -28,9 +28,9 @@
 @keyframes cin-curtain{0%{opacity:1}55%{opacity:.85}100%{opacity:0;visibility:hidden}}
 @keyframes cin-wipe{from{transform:translate3d(0,0,0)}to{transform:translate3d(0,100vh,0);opacity:0}}
 /* phones and weak devices: keep entrances, drop endless effects */
-@media(max-width:700px){.cin-fx{display:none}}
+@media(max-width:700px){.cin-fx .s2,.cin-fx .s3{display:none!important}}
 html.cin-lite .cin-fx,html.cin-lite .cin-cursor{display:none}
-@media(prefers-reduced-motion:reduce){.cin-fx,.cin-cursor,.cin-curtain{display:none!important}}
+@media(prefers-reduced-motion:reduce){html:not([data-reading-motion=full]) .cin-fx,html:not([data-reading-motion=full]) .cin-cursor,html:not([data-reading-motion=full]) .cin-curtain{display:none!important}}
 /* premium finish */
 html{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;text-rendering:optimizeLegibility;-webkit-tap-highlight-color:transparent}
 ::selection{background:rgba(214,255,90,.28);color:inherit}
@@ -41,7 +41,7 @@ html{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;text-r
 .page-title{letter-spacing:-.02em}
 .sidebar nav button,.sidebar nav a{transition:background .2s,color .2s,transform .2s}
 @media(hover:hover){.sidebar nav button:hover,.sidebar nav a:hover{transform:translate3d(2px,0,0)}}
-@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.primary:active,.new-chat:active{transform:none}}
+@media(prefers-reduced-motion:reduce){html:not([data-reading-motion=full]){scroll-behavior:auto}html:not([data-reading-motion=full]) .primary:active,html:not([data-reading-motion=full]) .new-chat:active{transform:none}}
 /* premium cinematic pass 2: grain, letterbox open, light sweep, depth */
 .cin-bars{position:fixed;inset:0;z-index:9996;pointer-events:none}
 .cin-bars::before,.cin-bars::after{content:"";position:absolute;left:0;right:0;height:14vh;background:#030405}
@@ -55,7 +55,7 @@ html{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;text-r
 .access-story h1,.access-story h2{letter-spacing:-.025em;text-shadow:0 2px 30px rgba(0,0,0,.45)}
 @media(max-width:700px){.cin-bars::before,.cin-bars::after{height:8vh}}
 html.cin-lite .cin-sweep{display:none}
-@media(prefers-reduced-motion:reduce){.cin-bars,.cin-sweep{display:none!important}}
+@media(prefers-reduced-motion:reduce){html:not([data-reading-motion=full]) .cin-bars,html:not([data-reading-motion=full]) .cin-sweep{display:none!important}}
 /* pass 3: composer light, welcome depth */
 .composer{transition:border-color .3s,box-shadow .35s}
 .composer:focus-within{border-color:rgba(214,255,90,.5);box-shadow:0 8px 40px rgba(0,0,0,.35),0 0 0 1px rgba(214,255,90,.18),0 0 36px rgba(214,255,90,.12)}
@@ -66,7 +66,7 @@ html.cin-lite .cin-sweep{display:none}
 @keyframes cin-float{0%,100%{transform:translate3d(0,0,0)}50%{transform:translate3d(0,-5px,0)}}
 @media(max-width:700px){.welcome::before{animation:none;opacity:.7}}
 html.cin-lite .welcome::before,html.cin-lite .hero-icon{animation:none}
-@media(prefers-reduced-motion:reduce){.welcome::before,.hero-icon{animation:none!important}}
+@media(prefers-reduced-motion:reduce){html:not([data-reading-motion=full]) .welcome::before,html:not([data-reading-motion=full]) .hero-icon{animation:none!important}}
 .composer textarea:focus-visible,.composer input:focus-visible{outline:none}
 /* login 3D (transform/opacity only, adaptive: html.cin-3d = strong device, cin-lite = weak) */
 html:not(.cin-lite) .access-story{perspective:900px}
@@ -90,7 +90,7 @@ html:not(.cin-lite) .access-card button.primary:active{transform:translate3d(0,3
 @keyframes cin-g2{from{transform:rotateX(-25deg) rotateY(30deg) rotateZ(-10deg)}to{transform:rotateX(15deg) rotateY(-20deg) rotateZ(12deg) translate3d(20px,-30px,40px)}}
 @keyframes cin-g3{from{transform:rotateY(35deg) rotateZ(-6deg)}to{transform:rotateY(-15deg) rotateZ(4deg) translate3d(40px,-16px,30px)}}
 html:not(.cin-3d) .cin-glass{display:none}
-@media(prefers-reduced-motion:reduce){html.cin-3d .access-story h1{animation:none!important}.cin-glass{display:none!important}html.cin-3d .access-card,html.cin-3d .access-story{transform:none!important}}
+@media(prefers-reduced-motion:reduce){html.cin-3d:not([data-reading-motion=full]) .access-story h1{animation:none!important}html:not([data-reading-motion=full]) .cin-glass{display:none!important}html.cin-3d:not([data-reading-motion=full]) .access-card,html.cin-3d:not([data-reading-motion=full]) .access-story{transform:none!important}}
 /* phone: keep light effects off the text */
 @media(max-width:700px){.cin-sweep{display:none}.access-story p{text-shadow:0 1px 14px #000,0 0 3px #000}.login-film{opacity:.45}}
 /* liquid glass / spatial (login). Blur only on strong devices; others get translucent fill. */
@@ -105,7 +105,7 @@ html:not(.cin-lite) .access-tabs{background:rgba(255,255,255,.05)!important;bord
 html:not(.cin-lite) .access-features>span,html:not(.cin-lite) .access-story .access-contacts a,html:not(.cin-lite) .access-contacts>*{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.16)!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.12),0 6px 16px rgba(0,0,0,.25)}
 html:not(.cin-lite) .access-features>span{transition:transform .25s,background .25s}
 @media(hover:hover){html:not(.cin-lite) .access-features>span:hover{transform:translate3d(0,-2px,0);background:rgba(214,255,90,.1)}}
-@media(prefers-reduced-motion:reduce){.access-card::after{display:none!important}}
+@media(prefers-reduced-motion:reduce){html:not([data-reading-motion=full]) .access-card::after{display:none!important}}
 /* app surfaces: glass rim, no extra blur except the top bar (strong devices) */
 html:not(.cin-lite) .home-card,html:not(.cin-lite) .settings-card,html:not(.cin-lite) .intel-card,html:not(.cin-lite) .plan-card,html:not(.cin-lite) .library-card{box-shadow:inset 0 1px 0 rgba(255,255,255,.1),inset 0 0 0 1px rgba(255,255,255,.03)}
 html:not(.cin-lite) .composer{box-shadow:inset 0 1px 0 rgba(255,255,255,.1),0 8px 32px #00000040}
@@ -123,7 +123,47 @@ html:not(.cin-lite) .sidebar{background-image:linear-gradient(180deg,rgba(255,25
 @media(hover:hover) and (pointer:fine){html:not(.cin-lite) .cl:hover{transform:translate3d(0,-4px,24px);transition:transform .2s}}
 .cin-tap-hint{margin:6px 0 0!important;font-size:10px;letter-spacing:.26em;text-transform:uppercase;color:rgba(214,255,90,.7)!important;animation:cin-hint 3.6s ease-in-out infinite}
 @keyframes cin-hint{0%,100%{opacity:.4}50%{opacity:.85}}
-@media(prefers-reduced-motion:reduce){.cin-tap-hint{animation:none}.cl{cursor:default}}
+@media(prefers-reduced-motion:reduce){html:not([data-reading-motion=full]) .cin-tap-hint{animation:none}html:not([data-reading-motion=full]) .cl{cursor:default}}
 .access-story h1 .cl{margin-right:-.012em}
 .access-story h1 .cl:first-child{margin-left:-.01em}
 .access-story p.cin-tap-hint{color:rgba(214,255,90,.8)!important;margin:10px 0 8px!important}
+
+/* Phone motion: light, GPU-friendly (transform and opacity only). Applies on touch screens and small widths. */
+@media(max-width:900px){
+ @keyframes ph-rise{from{opacity:0;transform:translate3d(0,14px,0)}to{opacity:1;transform:none}}
+ @keyframes ph-pop{from{opacity:0;transform:scale(.96) translate3d(0,8px,0)}to{opacity:1;transform:none}}
+ @keyframes ph-float{0%,100%{transform:translate3d(0,0,0)}50%{transform:translate3d(0,-6px,0)}}
+ @keyframes ph-glow{0%,100%{box-shadow:0 0 0 0 rgba(214,255,90,.0)}50%{box-shadow:0 0 0 7px rgba(214,255,90,.14)}}
+ .welcome h1,.welcome>p{animation:ph-rise .6s cubic-bezier(.2,.8,.2,1) backwards}
+ .welcome>p{animation-delay:.08s}
+ .suggestions>*{animation:ph-rise .5s cubic-bezier(.2,.8,.2,1) backwards}
+ .suggestions>*:nth-child(1){animation-delay:.12s}.suggestions>*:nth-child(2){animation-delay:.18s}.suggestions>*:nth-child(3){animation-delay:.24s}.suggestions>*:nth-child(4){animation-delay:.3s}.suggestions>*:nth-child(n+5){animation-delay:.34s}
+ .home-card,.home-studio-hero,.plan-card,.tool-card,.settings-card{animation:ph-rise .5s cubic-bezier(.2,.8,.2,1) backwards}
+ .home-card:nth-child(2),.tool-card:nth-child(2),.plan-card:nth-child(2),.settings-card:nth-child(2){animation-delay:.06s}
+ .home-card:nth-child(3),.tool-card:nth-child(3),.plan-card:nth-child(3),.settings-card:nth-child(3){animation-delay:.12s}
+ .home-card:nth-child(4),.tool-card:nth-child(4),.plan-card:nth-child(4),.settings-card:nth-child(4){animation-delay:.18s}
+ .home-card:nth-child(n+5),.tool-card:nth-child(n+5),.plan-card:nth-child(n+5),.settings-card:nth-child(n+5){animation-delay:.22s}
+ .message{animation:ph-pop .32s cubic-bezier(.2,.8,.2,1) backwards}
+ .hero-icon{animation:ph-float 4.5s ease-in-out infinite}
+ .composer .send,.composer button.primary{animation:ph-glow 2.8s ease-in-out infinite}
+ .mobile-tabbar button{transition:transform .18s,color .18s}.mobile-tabbar button:active{transform:scale(.9)}
+ .mobile-tabbar button[aria-current=page],.mobile-tabbar button.active,.mobile-tabbar .selected{transform:translate3d(0,-2px,0)}
+ button:active,.suggestions>*:active,.home-card:active{transform:scale(.97);transition:transform .1s}
+}
+@media(max-width:900px) and (prefers-reduced-motion:reduce){html:not([data-reading-motion=full]) *{animation:none!important}}
+
+/* Page entrance stagger (first six blocks only, transform and opacity only). */
+@keyframes cin-rise-p{from{opacity:0;transform:translate3d(0,14px,0)}to{opacity:1;transform:none}}
+.page>*:nth-child(-n+6){animation:cin-rise-p .5s cubic-bezier(.2,.8,.2,1) backwards}
+.page>*:nth-child(1){animation-delay:.04s}.page>*:nth-child(2){animation-delay:.1s}.page>*:nth-child(3){animation-delay:.16s}.page>*:nth-child(4){animation-delay:.22s}.page>*:nth-child(5){animation-delay:.28s}.page>*:nth-child(6){animation-delay:.34s}
+html.cin-lite .page>*:nth-child(-n+6){animation-duration:.3s}
+.cin-fx .s2{top:58vh;width:55vw;height:1px;background:linear-gradient(90deg,transparent,rgba(160,140,255,.95) 50%,transparent);box-shadow:0 0 16px 2px rgba(160,140,255,.25);animation:cin-streak 17s linear infinite 5s}
+.cin-fx .s3{top:82vh;width:80vw;animation:cin-streak 21s linear infinite 9s}
+html:not(.cin-lite) .cin-fx .s2,html:not(.cin-lite) .cin-fx .s3{display:block}
+
+/* Touch equivalent of the animated cursor: tap ripple and a soft glow under the finger. */
+.cin-tap{position:fixed;left:0;top:0;z-index:100002;pointer-events:none;width:0;height:0}
+.cin-tap i{position:absolute;left:-30px;top:-30px;width:60px;height:60px;border-radius:50%;border:2px solid var(--accent,#d4ff61);box-shadow:0 0 18px var(--accent,#d4ff61);animation:cin-tap .6s cubic-bezier(.2,.8,.2,1) forwards}
+@keyframes cin-tap{from{transform:scale(.2);opacity:.95}to{transform:scale(1.5);opacity:0}}
+.cin-finger{position:fixed;left:-26px;top:-26px;width:52px;height:52px;margin:0;border-radius:50%;z-index:100001;pointer-events:none;opacity:0;transition:opacity .2s;background:radial-gradient(circle,color-mix(in srgb,var(--accent,#d4ff61) 55%,transparent),transparent 70%);will-change:transform}
+.cin-finger.on{opacity:.9}

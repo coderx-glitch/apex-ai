@@ -1,6 +1,6 @@
 import React from'react';
 export function Letters({text,off=0}){let n=off;return text.split(' ').map((w,wi)=><React.Fragment key={wi}><b className="cw" aria-hidden="true">{[...w].map((ch,i)=><i className="cl" key={i} data-n={n++}>{ch}</i>)}</b>{wi<text.split(' ').length-1?' ':null}</React.Fragment>)}
-const reduced=()=>matchMedia('(prefers-reduced-motion: reduce)').matches;
+const reduced=()=>{try{if((JSON.parse(localStorage.getItem('apex-reading')||'{}').motion||'full')==='full')return false}catch{}return matchMedia('(prefers-reduced-motion: reduce)').matches};
 let timer=0,t2=0;
 export function burstText(e){const h1=e.currentTarget,hit=e.target.closest?.('.cl');if(reduced())return;const letters=[...h1.querySelectorAll('.cl')];if(!letters.length)return;
 const ref=(hit||letters[Math.floor(letters.length/2)]).getBoundingClientRect(),ox=ref.left+ref.width/2,oy=ref.top+ref.height/2,small=innerWidth<700;

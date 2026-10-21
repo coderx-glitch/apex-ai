@@ -69,6 +69,6 @@ resize();addEventListener('resize',resize);
 if(!paused){addEventListener('pointermove',move,{passive:true});raf=requestAnimationFrame(frame)}
 return()=>{cancelAnimationFrame(raf);io.disconnect();removeEventListener('resize',resize);removeEventListener('pointermove',move);gl.getExtension('WEBGL_lose_context')?.loseContext()}},[paused]);
 return <canvas ref={ref} className={className+" "+(!paused?"playing":"")} aria-hidden="true"/>}
-export function useReducedMotion(){const[paused,P]=useState(()=>{try{return matchMedia('(prefers-reduced-motion: reduce)').matches||loadReading(localStore).motion==='reduce'}catch{return false}});
-useEffect(()=>{const media=matchMedia('(prefers-reduced-motion: reduce)'),update=()=>{if(media.matches)P(true)};media.addEventListener('change',update);return()=>media.removeEventListener('change',update)},[]);return paused}
+export function useReducedMotion(){const[paused,P]=useState(()=>{try{const m=loadReading(localStore).motion;return m==='reduce'||(m!=='full'&&matchMedia('(prefers-reduced-motion: reduce)').matches)}catch{return false}});
+useEffect(()=>{const media=matchMedia('(prefers-reduced-motion: reduce)'),update=()=>{if(media.matches&&loadReading(localStore).motion!=='full')P(true)};media.addEventListener('change',update);return()=>media.removeEventListener('change',update)},[]);return paused}
 export default function ThemeScene(){const paused=useReducedMotion();return <><div className={"theme-bloom"} aria-hidden="true"/><SceneCanvas paused={paused} className="theme-scene" cfg={{sc:1.0,scM:.8,off:[.66,.12],offM:[0,.62],dim:.34,speed:.7}}/></>}

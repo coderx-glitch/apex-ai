@@ -1,6 +1,0 @@
-import{irisEstimate}from'./camera-game-input.js';
-// Local face geometry/blendshapes for games, not identity or medical inference.
-const clamp=(n,a,b)=>Math.max(a,Math.min(b,n));
-export function faceGameSignal(points,categories){if(!Array.isArray(points)||points.length<264||![1,33,263].every(i=>Number.isFinite(points[i]?.x)&&Number.isFinite(points[i]?.y)))return null;const nose=points[1],left=points[33],right=points[263],dx=(right.x-left.x)*640,dy=(right.y-left.y)*480,span=Math.hypot(dx,dy);if(span<24||nose.x<0||nose.x>1||nose.y<0||nose.y>1)return null;const jaw=(categories||[]).find(c=>c.categoryName==='jawOpen')?.score;if(!Number.isFinite(jaw))return null;return{x:clamp(1-nose.x,0,1),y:clamp(nose.y,0,1),roll:Math.atan2(dy,dx),jaw:clamp(jaw,0,1),iris:irisEstimate(points,categories)}}
-export function faceGameCalibration(signal){if(!signal||![signal.x,signal.y,signal.roll].every(Number.isFinite))return null;return{x:signal.x,y:signal.y,roll:signal.roll}}
-export function calibratedFaceGame(signal,calibration,previousOpen=false){if(!signal||!calibration)return null;const angle=Math.atan2(Math.sin(signal.roll-calibration.roll),Math.cos(signal.roll-calibration.roll));return{x:clamp(.5+(signal.x-calibration.x)*2,.05,.95),y:clamp(.5+(signal.y-calibration.y)*2,.05,.95),tilt:clamp(-angle/.35,-1,1),mouthOpen:previousOpen?signal.jaw>.25:signal.jaw>.45}}

@@ -1,2 +1,0 @@
-export function isChunkFailure(error){return /Failed to fetch dynamically imported module|Importing a module script failed|error loading dynamically imported module|Loading (?:CSS )?chunk|Unable to preload CSS/i.test(String(error?.message||error));}
-export async function retryToolImport(importer,{attempts=3,delay=ms=>new Promise(r=>setTimeout(r,ms))}={}){for(let n=0;n<attempts;n++){try{return await importer()}catch(error){if(!isChunkFailure(error)||n===attempts-1)throw error;await delay(500*(n+1))}}}

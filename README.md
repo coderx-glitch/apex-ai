@@ -1,78 +1,102 @@
 # APEX AI
 
-My personal AI workbench. One Flask server that serves the web app and talks
-to the AI provider, so the API key never sits in the browser.
+A personal AI workbench I built as a student project. It puts the tools I use every day in one web app: a chat assistant, notes, tasks, documents, converters, a code space, a slide maker and a large arcade of games. It also works as an installable phone app.
 
-I built this to keep my daily stuff in one place - chat with documents, notes,
-tasks, a few games, and some camera experiments. Everything a visitor saves
-stays in their own browser (localStorage). There is no cloud account database
-to leak because there is no cloud account database.
+**Live demo:** https://apex-ai-three-sigma.vercel.app (open it and press *Continue as guest*)
+
+The assistant inside the app is called **Vyom**.
+
+> Project status: working prototype, built for Tech Utsav 2026 (October 22-23). See [docs/REPORT.md](docs/REPORT.md) for the full project report, architecture and honest limits.
+
+## What it does
+
+Everything below is built and working in the current version.
+
+| Area | What you get |
+| --- | --- |
+| Chat | Streaming answers in Assistant, Research and Reasoning modes, Hinglish support, follow-up memory, file and image attachments, voice notes, read-aloud replies, branch from any message, export a chat |
+| Notes and tasks | A note editor with study tools and PDF export, a task board and calendar view, templates, reminders while the app is open, and a confirm dialog before a task is saved |
+| Documents and research | Read PDFs, scan and OCR images, web research with sources, Wikipedia lookup |
+| Code | Write and run Python in the browser, a step-by-step project builder |
+| Media | Free image generation, image tools (background removal, upscale), a video enhancer and slideshow maker that run on the device |
+| Converters | File and image conversion in the browser (no upload to a server) |
+| Slides | Builds a real `.pptx` file |
+| Plugins | Weather, recipes, news, movies and TV, music, anime, books, currency, YouTube, space photos, stock photos, Wikipedia |
+| Games | 67 games with a bot to play against, including games you control with your hand, face or eyes through the camera, plus a quiz Rooms mode |
+| Look and feel | 24 themes (5 open to guests), liquid-glass login with a 3D scene on strong devices, a lighter version on weak devices, reduced-motion support |
+| Plans and tokens | Free, Go, Plus and Pro tiers, a token counter, and tokens earned by playing games. Plan purchases by UPI are checked by hand by the owner |
+
+### Upcoming (not built yet)
+
+These appear in the app labelled **Coming next**. They are not working features:
+
+- Failure Forecast (warn when a task is likely to slip)
+- Time Travel (ask what you were working on 30 days ago)
+- Multi-agent tasks (planner, researcher and critic with a visible trace)
+- Cash Pro purchases (paused)
+- Paid video generation (locked)
+
+## Privacy by design
+
+- Chats, notes, tasks and memory are stored in the visitor's own browser (local storage). There is no cloud database of user content.
+- API keys live only in server environment variables. The browser never sees them, and the build runs a scan that fails if a known key pattern ends up in the public files.
+- The public demo shares a small free allowance between all guests. Daily limits per visitor, per IP and overall protect the free quotas.
 
 ## Tech stack
 
-- **Backend:** Python + Flask (this repo, `app.py`)
-- **Frontend:** React + Vite (source in `frontend/`, builds into `dist/`)
-- **AI:** Google Gemini free tier (chat + file understanding)
-- **Hosting:** any box that can run Python - gunicorn for production
-
-## Run it locally (VS Code)
-
-1. Install Python 3.11+ and Node 20+.
-2. `pip install -r requirements.txt`
-3. Build the front end once:
-   ```
-   cd frontend
-   npm install
-   npm run build
-   xcopy /E /I dist ..\dist     :: on Mac/Linux: cp -r dist ../dist
-   ```
-4. Make a `.env` file in the project root:
-   ```
-   GEMINI_API_KEY=paste-your-free-key-from-aistudio.google.com
-   APEX_ACCESS_TOKEN=make-up-a-long-owner-code
-   # optional, only for AI images (free account at cloudflare.com):
-   CLOUDFLARE_ACCOUNT_ID=
-   CLOUDFLARE_API_TOKEN=
-   CLOUDFLARE_FREE_TIER_CONFIRMED=true
-   APEX_GUEST_IMAGE_ENABLED=true
-   APEX_GEMINI_FREE_CONFIRMED=true
-   ```
-5. `python app.py` and open http://localhost:5000
-
-The owner code is what unlocks AI features. Without it you still get the
-guest workspace (notes, tasks, games - all local).
-
-## What works
-
-- Chat with Gemini, streaming replies
-- Attach photos (resized on-device, original never touched)
-- Upload big files (video/audio/large PDFs, up to 400 MB) to the AI through
-  a chunked bridge - Google keeps them max 48 hours on the free tier
-- Notes, tasks, projects, memory - all saved on the device
-- 50+ small games with a token system: play games, earn tokens, unlock themes
-- Voice launcher ("Hey APEX") and experimental eye/hand controls
-
-## Honest limits
-
-- The free Gemini tier has daily limits; when it runs out, chat pauses.
-- Reminders only fire while the app is open (no background service).
-- No paid features, no tracking, no analytics.
-- This is a learning project, not a production multi-user system.
+- **Front end:** React 19, Vite 6, plain CSS, a few canvas/WebGL scenes
+- **Back end:** serverless functions in `api/` (Node.js on Vercel)
+- **AI:** a free-tier hosted language model API, with a second free provider that answers automatically when the first is slow or full
+- **Sign-in and guest allowance:** Firebase Authentication (Google and email) and Firestore for the shared quota counter
+- **In the browser:** Pyodide (Python), Tesseract (OCR), FFmpeg (video), MediaPipe (hand, face and eye tracking), pdf-lib and PDF.js, pptxgenjs, a background-removal model
+- **Tests:** Node's built-in test runner
 
 ## Project layout
 
 ```
-app.py             Flask server + API routes (chat for owner + guests,
-                   code builder, image generation, summarize, status,
-                   file upload bridge, access check, model list)
-requirements.txt   Python dependencies
-frontend/          React source (Vite build -> ../dist)
+api/        serverless endpoints (chat, connect, status, image, code, uploads ...)
+lib/        shared logic used by the server and the app (limits, security, caches, games ...)
+src/        React app: screens, styles, 3D scenes
+public/     static assets and the browser-side runtimes (OCR, FFmpeg, Pyodide, vision)
+tests/      unit tests
+setup/      setup notes and build-time checks
+docs/       project report
 ```
 
-Image generation goes through a free Cloudflare Workers AI account and
-the code builder through the same free Gemini key - both need their own
-free accounts in .env (see the example above) and stay off until you add
-them. Paid video stays locked on purpose; the free short clips go
-straight from the browser to the public LTX demo, so no key for that
-either. Guest limits are simple in-memory counters (one small server),
-with the same daily numbers the site shows.
+## Run it locally
+
+You need Node.js 20 or newer.
+
+```bash
+git clone https://github.com/coderx-glitch/apex-ai.git
+cd apex-ai
+npm install
+cp .env.example .env      # then add your own keys (all optional)
+npm run dev
+```
+
+The dev server serves the front end. The `api/` functions need a serverless host to run; the easiest way is `npx vercel dev` with your own free account. Without keys, the app still opens and every tool that does not need a server key works. Features that need a missing key say so on screen.
+
+### Build and test
+
+```bash
+npm run build     # production build plus the public-secret scan
+npm test          # unit tests
+```
+
+### Deploy
+
+The project is set up for Vercel (`vercel.json`). Add the variables from `.env.example` in the project settings, then deploy. Login setup is described in [setup/FIREBASE-SETUP.md](setup/FIREBASE-SETUP.md).
+
+## Honest limits
+
+- The AI runs on free tiers, so answers can be slow or temporarily unavailable when a provider is busy. The backup provider covers most of these cases.
+- Guest use is capped (15 requests per visitor per day on the demo).
+- Reminders only fire while the app is open.
+- Notes and chats do not sync between devices.
+- The 3D login look needs a reasonably strong device; weaker phones get a simpler version on purpose.
+- Tested mainly in Chrome. The phone app is an installable web app (PWA), not a store app.
+
+## Author
+
+Aabhas Gupta

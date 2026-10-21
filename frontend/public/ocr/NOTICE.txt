@@ -1,5 +1,0 @@
-APEX Scan uses Tesseract.js7 and tesseract.js-core, ApacheLicense2.0.
-Copyright their respective contributors. Full Apache notices are included here.
-https://github.com/naptha/tesseract.js
-https://github.com/naptha/tesseract.js-core
-English traineddata supplied by @tesseract.js-data/eng1.0.0 from https://github.com/naptha/tessdata . Package license MIT. Upstream Tesseract traineddata Apache2.0. No model ownership or endorsement is claimed. License notices retained; runtime files are unmodified copies.

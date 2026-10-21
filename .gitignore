@@ -1,5 +1,17 @@
+# secrets and local config
 .env
+.env.*
+!.env.example
+*.pem
+service-account*.json
+
+# dependencies and build output
+node_modules/
+dist/
+
+# tooling
+.vercel/
+*.log
+.DS_Store
 __pycache__/
 *.pyc
-dist/
-node_modules/

@@ -1,2 +1,0 @@
-// Best-effort per-instance guard. A durable shared limiter is required for a multi-user launch.
-const buckets=new Map();export function rateLimit(req){const key=String(req.headers['x-forwarded-for']||'unknown').split(',')[0],time=Date.now(),entry=buckets.get(key)||{start:time,count:0};if(time-entry.start>60000){entry.start=time;entry.count=0}entry.count++;buckets.set(key,entry);if(buckets.size>1000)for(const[k,v]of buckets)if(time-v.start>60000)buckets.delete(k);return entry.count<=12;}

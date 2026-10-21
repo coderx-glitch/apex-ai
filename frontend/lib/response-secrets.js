@@ -1,3 +1,0 @@
-import{PRIVATE_ENV_NAMES}from'./public-secret-scan.js';
-export function privateResponseValues(env=process.env){const values=PRIVATE_ENV_NAMES.map(k=>env[k]).filter(v=>typeof v==='string'&&v.length>=8);try{const key=JSON.parse(env.FIREBASE_SERVICE_ACCOUNT_JSON||'null')?.private_key;if(key)values.push(key)}catch{}return[...new Set(values)].sort((a,b)=>b.length-a.length)}
-export function safeResponseJson(value,env=process.env){let text=JSON.stringify(value);if(typeof text!=='string')return text;for(const secret of privateResponseValues(env)){const escaped=JSON.stringify(secret).slice(1,-1);text=text.split(escaped).join('[REDACTED]');}return text}

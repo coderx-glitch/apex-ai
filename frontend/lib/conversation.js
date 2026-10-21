@@ -1,2 +1,0 @@
-export function branchConversation(chat,messageId,id){const index=chat.messages.findIndex(m=>m.id===messageId);if(index<0)throw Error('This message is no longer available. Nothing changed.');return{id,projectId:chat.projectId||'',title:(chat.title||'Conversation').slice(0,140)+' · Branch',messages:structuredClone(chat.messages.slice(0,index+1)),summary:'',summarizedUntil:0}}
-export function conversationTitle(title){return String(title||'').replace(/[\r\n]+/g,' ').trim().slice(0,160)||'Untitled conversation'}

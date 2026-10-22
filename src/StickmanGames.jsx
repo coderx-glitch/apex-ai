@@ -1,4 +1,4 @@
-import React,{useEffect,useRef,useState}from'react';
+import{finish as finishFrame}from'../lib/gfx.js';import React,{useEffect,useRef,useState}from'react';
 import{newStickDash,stickDashStep,newKarate,karateStep,karatePunch}from'../lib/stickman-games.js';
 function stickman(x,cx,cy,scale,pose){
   x.strokeStyle='#f5efe0';x.lineWidth=3*scale;x.lineCap='round';x.fillStyle='#f5efe0';
@@ -17,7 +17,7 @@ function stickman(x,cx,cy,scale,pose){
 export default function StickmanGames({kind,onComplete,sound}){
   const canvas=useRef(),state=useRef(kind==='stick-karate'?newKarate():newStickDash()),raf=useRef(),last=useRef(0),active=useRef(false),done=useRef(false),callbacks=useRef();callbacks.current={onComplete,sound};
   const[mode,M]=useState('ready'),[hud,H]=useState(state.current);
-  function draw(s){const x=canvas.current?.getContext('2d');if(!x)return;const w=640,h=360,ground=h-46;
+  function draw(s){drawBase(s);const c2=canvas.current?.getContext('2d');if(c2)finishFrame(c2,640,360)}function drawBase(s){const x=canvas.current?.getContext('2d');if(!x)return;const w=640,h=360,ground=h-46;
     const bg=x.createLinearGradient(0,0,0,h);bg.addColorStop(0,'#1b2a24');bg.addColorStop(1,'#0c1512');x.fillStyle=bg;x.fillRect(0,0,w,h);
     x.strokeStyle='#7fae8c';x.lineWidth=3;x.beginPath();x.moveTo(0,ground);x.lineTo(w,ground);x.stroke();
     if(kind==='stick-dash'){const px=70,py=ground-s.y*120;

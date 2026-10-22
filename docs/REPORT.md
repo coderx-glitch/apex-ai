@@ -52,7 +52,7 @@ Goals:
 **Plugins** (all free tiers): weather, recipes, news, movies and TV, music, anime, books, currency, YouTube, space photos and near-earth objects, stock photos, Wikipedia.
 
 **Games**
-- 67 games with local bots, including games controlled by hand, face or eye movement through the camera, and a Rooms mode for a shared quiz.
+- 68 games with local bots, including games controlled by hand, face or eye movement through the camera, and a Rooms mode for a shared quiz.
 
 **Look and feel**
 - 24 themes, five of them open to guests.

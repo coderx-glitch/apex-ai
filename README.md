@@ -21,7 +21,7 @@
 
 APEX AI is a personal workbench I built as a student. Instead of switching between a chat app, a notes app, a to-do list, a PDF reader and a few games, I wanted one place that does all of it and keeps my data on my own device.
 
-The assistant inside is called **Vyom**. It answers in English and Hinglish, reads my documents, runs Python in the browser, makes slide decks and helps me study. When it is not working on something, there are 67 games to play.
+The assistant inside is called **Vyom**. It answers in English and Hinglish, reads my documents, runs Python in the browser, makes slide decks and helps me study. When it is not working on something, there are 68 games to play.
 
 **Try it:** https://apex-ai-three-sigma.vercel.app (press *Continue as guest*, no sign-up needed)
 
@@ -90,7 +90,7 @@ Streaming answers, three modes (Assistant, Research, Reasoning), follow-up memor
     <td width="33%"><img src="docs/images/plans.jpg" alt="Plans and tokens"></td>
   </tr>
   <tr>
-    <td align="center"><sub>67 games with local bots</sub></td>
+    <td align="center"><sub>68 games with local bots</sub></td>
     <td align="center"><sub>24 themes</sub></td>
     <td align="center"><sub>Plans and the token counter</sub></td>
   </tr>
@@ -144,7 +144,7 @@ Everything in this section is built and working in the current version.
 Weather, recipes, news, movies and TV, music, anime, books, currency, YouTube, space photos and asteroids, stock photos, Wikipedia.
 
 ### Games
-- **67 games** with local bots, including games you control with your **hand, face or eyes** through the camera
+- **68 games** with local bots, including games you control with your **hand, face or eyes** through the camera
 - A Rooms mode: share a code and play a live quiz together
 
 ### Look and feel

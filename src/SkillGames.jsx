@@ -1,4 +1,4 @@
-import React,{useEffect,useRef,useState}from'react';
+import React,{useEffect,useRef,useState}from'react';import GlideGame from'./GlideGame.jsx';
 import{TYPING_PASSAGES,typingResult,rhythmGrade,makePath,pathRound,makeOddGrid}from'../lib/skill-games.js';
 function TypingSprint({onComplete,sound}){
   const[pi,PI]=useState(()=>Math.floor(Math.random()*TYPING_PASSAGES.length));
@@ -97,4 +97,4 @@ function OddOneOut({onComplete,sound}){
       <button className="primary" onClick={()=>{RD(0);GR(makeOddGrid(0));SK(0);OV(false)}}>Play again</button></div>}
     <p className="game-rules">One tile is a slightly lighter shade of the same hue. Ten seconds per round; a wrong tile or a timeout costs a strike. Shade gap shrinks as rounds climb.</p>
   </div>}
-export default function SkillGames({kind,onComplete,sound}){return kind==='rhythm-pulse'?<RhythmPulse onComplete={onComplete} sound={sound}/>:kind==='path-memory'?<PathMemory onComplete={onComplete} sound={sound}/>:kind==='odd-one-out'?<OddOneOut onComplete={onComplete} sound={sound}/>:<TypingSprint onComplete={onComplete} sound={sound}/>}
+export default function SkillGames({kind,onComplete,sound}){return kind==='glide-gap'?<GlideGame onComplete={onComplete} sound={sound}/>:kind==='rhythm-pulse'?<RhythmPulse onComplete={onComplete} sound={sound}/>:kind==='path-memory'?<PathMemory onComplete={onComplete} sound={sound}/>:kind==='odd-one-out'?<OddOneOut onComplete={onComplete} sound={sound}/>:<TypingSprint onComplete={onComplete} sound={sound}/>}

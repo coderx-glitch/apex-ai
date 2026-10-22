@@ -34,3 +34,23 @@ body::after{display:none!important}:root{--workbench-serif:Manrope,'DM Sans',san
 .composer .send::after,.composer button.primary::after{content:"";position:absolute;inset:0;border-radius:inherit;box-shadow:0 0 0 7px rgba(214,255,90,.14);opacity:0;pointer-events:none;will-change:opacity;animation:ph-ring 2.8s ease-in-out infinite}
 @keyframes ph-ring{0%,100%{opacity:0}50%{opacity:1}}
 }
+/* Game polish: depth and colour only, no layout changes. */
+.chess-board{box-shadow:0 14px 34px rgba(0,0,0,.45),0 0 0 1px rgba(255,255,255,.06),inset 0 0 18px rgba(0,0,0,.25)}
+.light-square{background:linear-gradient(145deg,#d6e0e8,#bccad5)}
+.dark-square{background:linear-gradient(145deg,#5d6f8d,#485872)}
+.chess-board button{transition:background-color .18s,box-shadow .18s}
+.chess-board button:hover{box-shadow:inset 0 0 0 2px rgba(214,255,97,.45)}
+.chess-board button.selected{box-shadow:inset 0 0 0 3px #d4ff61,0 0 14px rgba(173,157,240,.7)}
+.white-piece{filter:drop-shadow(0 2px 2px rgba(10,20,40,.55));text-shadow:0 0 6px rgba(255,255,255,.25)}
+.black-piece{filter:drop-shadow(0 2px 2px rgba(10,20,40,.5))}
+.merge-tile{transition:background-color .2s,color .2s,transform .18s,box-shadow .2s}
+.merge-tile:not(.value-0){background:linear-gradient(145deg,#2f4a5c,#213544);box-shadow:inset 0 1px 0 rgba(255,255,255,.12),0 4px 10px rgba(0,0,0,.25)}
+.merge-tile.value-4{background:linear-gradient(145deg,#2f5d63,#244850)}
+.merge-tile.value-8,.merge-tile.value-16,.merge-tile.value-32{background:linear-gradient(145deg,#7a4d66,#5a3750)}
+.merge-tile.value-64,.merge-tile.value-128,.merge-tile.value-256,.merge-tile.value-512,.merge-tile.value-1024,.merge-tile.value-2048{background:linear-gradient(145deg,#9a7e3a,#735c28);box-shadow:inset 0 1px 0 rgba(255,255,255,.2),0 0 16px rgba(240,200,90,.28)}
+.mini-grid button{transition:transform .16s,background-color .2s,border-color .2s,box-shadow .2s}
+.mini-grid button:not(:disabled):hover{transform:translate3d(0,-2px,0)}
+.mini-grid button:not(:disabled):active{transform:scale(.96)}
+.mini-grid button.matched{box-shadow:0 0 14px rgba(99,206,188,.35)}
+.lit{box-shadow:0 0 16px rgba(99,206,188,.5)}
+@media(prefers-reduced-motion:reduce){.mini-grid button:hover{transform:none}}

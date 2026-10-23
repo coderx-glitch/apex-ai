@@ -1,29 +1,28 @@
 import React,{useEffect,useRef,useState}from'react';
 // Glide Gap: an original one-button gap game. Press Space, click or tap to flap.
-const W=480,H=640,GAP=170,PW=64,SPEED=170,GRAV=1500,FLAP=-440,BEST_KEY='apex-glide-best';
+const W=480,H=640,GAP=185,PW=64,SPEED=155,GRAV=1500,FLAP=-440,BEST_KEY='apex-glide-best';
 const readBest=()=>{try{return Number(localStorage.getItem(BEST_KEY))||0}catch{return 0}};
 const fresh=()=>({y:H/2-20,v:0,pipes:[],dist:0,score:0,over:false,started:false,t:0,flash:0,spawn:0,parts:[],shake:0,trail:0});
 export default function GlideGame({onComplete,sound}){
   const canvas=useRef(),st=useRef(fresh()),raf=useRef(),last=useRef(0),cb=useRef();cb.current={onComplete,sound};
   const[handOn,HO]=useState(()=>{try{return localStorage.getItem('apex-glide-hand')!=='off'}catch{return true}}),[sig,SIG]=useState(false),handRef=useRef(true);handRef.current=handOn;const[phase,PH]=useState('ready'),[score,SC]=useState(0),[best,BS]=useState(readBest);
-  const burstRef=useRef(()=>{}),phaseRef=useRef('ready');phaseRef.current=phase;
+  const burstRef=useRef(()=>{}),phaseRef=useRef('ready'),handY=useRef(null),handAt=useRef(0);phaseRef.current=phase;
   function flap(){const s=st.current;if(s.over)return;if(!s.started){s.started=true;s.spawn=0;PH('play')}s.v=FLAP;burstRef.current(80,s.y+10,7,'#d4ff61',90,.45);cb.current.sound?.('move')}
   function restart(){st.current=fresh();SC(0);PH('ready')}
   function end(){const s=st.current;if(s.over)return;s.over=true;s.flash=1;s.shake=1;burstRef.current(96,s.y,28,'#ff8a6b',240,.8);const b=Math.max(readBest(),s.score);try{localStorage.setItem(BEST_KEY,String(b))}catch{}BS(b);PH('over');cb.current.sound?.(s.score>=10?'score':'hit');cb.current.onComplete('glide-gap',s.score,s.score>=10)}
   useEffect(()=>{
     const key=e=>{if(e.code==='Space'||e.code==='ArrowUp'||e.key==='w'||e.key==='W'){e.preventDefault();if(phaseRef.current==='over'){if(!e.repeat)restart()}else if(!e.repeat)flap()}};
     window.addEventListener('keydown',key);
-    let prev='none',lastFlap=0,hist=[];
-    const hand=({detail:d})=>{const k=d&&d.kind||'none';const nowT=performance.now();if(k==='none'||!Number.isFinite(d.y))hist=[];else{hist=[...hist,{t:nowT,y:d.y}].filter(h=>nowT-h.t<260)}const raised=hist.length>2&&hist[0].y-d.y>.16&&k!=='pinch'&&nowT-lastFlap>350;if(raised){hist=[];if(handRef.current&&phaseRef.current!=='over'){lastFlap=nowT;flap()}return}SIG(k!=='none');const rising=(k==='pinch'||k==='palm')&&prev!==k&&prev!=='pinch'&&prev!=='palm'||(k==='pinch'&&prev==='palm')||(k==='palm'&&prev==='pinch'&&false);prev=k;if(!handRef.current||!rising)return;const n=performance.now();if(n-lastFlap<180)return;lastFlap=n;if(phaseRef.current==='over')return;flap()};
+    const hand=({detail:d})=>{const k=d&&d.kind||'none';if(!handRef.current){SIG(false);return}if(k==='none'||!Number.isFinite(d.y)){SIG(false);return}handY.current=d.y;handAt.current=performance.now();SIG(true);if(phaseRef.current==='ready'){const s=st.current;if(!s.over){s.started=true;s.spawn=0;PH('play')}}};
     window.addEventListener('apex-hand-frame',hand);
     const c=canvas.current,x=c.getContext('2d');
     function step(dt){const s=st.current;s.t+=dt;for(const q of s.parts){q.l-=dt;q.x+=q.vx*dt;q.y+=q.vy*dt;q.vy+=260*dt}s.parts=s.parts.filter(q=>q.l>0);if(s.shake>0)s.shake=Math.max(0,s.shake-dt*2.5);if(s.flash>0)s.flash=Math.max(0,s.flash-dt*3);
       if(!s.started){s.y=H/2-20+Math.sin(s.t*3.2)*9;return}
       if(s.over){s.v+=GRAV*dt;s.y=Math.min(H-26,s.y+s.v*dt);return}
-      s.v+=GRAV*dt;s.y+=s.v*dt;s.dist+=SPEED*dt;s.trail-=dt;if(s.trail<=0){s.trail=.05;s.parts.push({x:80,y:s.y+2,vx:-60,vy:0,l:.35,m:.35,c:'#bfe85a',r:2.2})}
+      if(handRef.current&&performance.now()-handAt.current<500){const target=40+handY.current*(H-128);s.y+=(target-s.y)*Math.min(1,dt*14);s.v=0}else{s.v+=GRAV*dt;s.y+=s.v*dt}s.dist+=SPEED*dt;s.trail-=dt;if(s.trail<=0){s.trail=.05;s.parts.push({x:80,y:s.y+2,vx:-60,vy:0,l:.35,m:.35,c:'#bfe85a',r:2.2})}
       const level=Math.min(1,s.score/40),spd=SPEED*(1+level*.35);
       s.spawn-=spd*dt;
-      if(s.spawn<=0){const gap=GAP-level*28,top=70+Math.random()*(H-140-gap-60);s.pipes.push({x:W+20,top,gap,passed:false});s.spawn=250}
+      if(s.spawn<=0){const gap=GAP-level*20,top=70+Math.random()*(H-140-gap-60);s.pipes.push({x:W+20,top,gap,passed:false});s.spawn=250}
       for(const p of s.pipes){p.x-=spd*dt;if(!p.passed&&p.x+PW<96){p.passed=true;s.score++;SC(s.score);burstRef.current(96,s.y,10,'#e6ff8f',120,.5);cb.current.sound?.('score')}}
       s.pipes=s.pipes.filter(p=>p.x>-PW-10);
       const bx=96,r=15;
@@ -55,6 +54,7 @@ export default function GlideGame({onComplete,sound}){
       x.fillStyle='#ffb347';x.beginPath();x.moveTo(24,1);x.lineTo(34,5);x.lineTo(22,7);x.fill();
       x.fillStyle='#fff';x.beginPath();x.arc(10,-4,4.4,0,7);x.fill();x.fillStyle='#0a0f16';x.beginPath();x.arc(11.2,-4,2.2,0,7);x.fill();
       x.fillStyle='#5f9a1a';x.beginPath();x.moveTo(-4,-2);x.quadraticCurveTo(-18,-22+flapPh*14,-32,-14+flapPh*20);x.quadraticCurveTo(-16,-4,-4,4);x.fill();x.restore();
+      if(handRef.current&&performance.now()-handAt.current<500){const ty=40+handY.current*(H-128);x.fillStyle='#d4ff61';x.beginPath();x.moveTo(W-4,ty);x.lineTo(W-18,ty-8);x.lineTo(W-18,ty+8);x.closePath();x.fill();x.globalAlpha=.25;x.fillRect(W-19,40,1,H-128);x.globalAlpha=1}
       x.fillStyle='rgba(8,14,20,.4)';x.beginPath();x.roundRect(W/2-34,34,68,60,14);x.fill();x.fillStyle='#f2fbf7';x.font='bold 44px sans-serif';x.textAlign='center';x.fillText(String(s.score),W/2,82);
       const vg=x.createRadialGradient(W/2,H/2,H*.35,W/2,H/2,H*.75);vg.addColorStop(0,'rgba(0,0,0,0)');vg.addColorStop(1,'rgba(0,0,0,.35)');x.fillStyle=vg;x.fillRect(-12,-12,W+24,H+24);
       if(s.flash>0){x.fillStyle='rgba(255,255,255,'+(s.flash*.4)+')';x.fillRect(-12,-12,W+24,H+24)}x.restore()}
@@ -69,6 +69,6 @@ export default function GlideGame({onComplete,sound}){
       {phase==='ready'&&<div style={{position:'absolute',inset:0,display:'grid',placeItems:'center',pointerEvents:'none'}}><div style={{textAlign:'center',color:'#e8f2ef',textShadow:'0 2px 10px #000'}}><p style={{fontSize:20,fontWeight:700,margin:0}}>Press Space or click to flap</p><p style={{opacity:.8,margin:'6px 0 0'}}>Slip through the gaps. Do not touch the pillars or the ground.</p></div></div>}
       {phase==='over'&&<div style={{position:'absolute',inset:0,display:'grid',placeItems:'center',background:'rgba(5,9,14,.62)',borderRadius:16}}><div style={{textAlign:'center',color:'#e8f2ef'}}><h3 style={{margin:0,fontSize:26}}>{score>=10?'Nice run':'Run over'}</h3><p style={{margin:'8px 0 14px'}}>Score {score} · Best {best}</p><button className="primary" onClick={restart}>Play again (Space)</button></div></div>}
     </div>
-    <div style={{display:'flex',alignItems:'center',gap:10,flexWrap:'wrap',margin:'10px 0 0'}}><button type="button" className="secondary" aria-pressed={handOn} onClick={()=>{const v=!handOn;HO(v);try{localStorage.setItem('apex-glide-hand',v?'on':'off')}catch{}}}>Hand control: {handOn?'on':'off'}</button><span style={{opacity:.8,fontSize:13}}>{!handOn?'Keyboard, click and tap still work.':sig?'Hand seen. Pinch, show an open palm or raise your hand quickly to flap.':'Start camera gestures in Controls, then pinch, show an open palm or raise your hand quickly to flap. Video stays on this device.'}</span></div>
-    <p className="game-rules">Space, Up arrow, W, click or tap to flap. Each pillar passed is one point; gaps narrow slowly as you score. 10 points counts as a win. With camera gestures on, a pinch, open palm or quick hand raise also flaps. Best score is saved on this device only.</p>
+    <div style={{display:'flex',alignItems:'center',gap:10,flexWrap:'wrap',margin:'10px 0 0'}}><button type="button" className="secondary" aria-pressed={handOn} onClick={()=>{const v=!handOn;HO(v);try{localStorage.setItem('apex-glide-hand',v?'on':'off')}catch{}}}>Hand control: {handOn?'on':'off'}</button><span style={{opacity:.8,fontSize:13}}>{!handOn?'Keyboard, click and tap still work.':sig?'Hand seen. Move your hand up and down; the bird follows.':'Start camera gestures in Controls, then move your hand up and down; the bird follows. Video stays on this device.'}</span></div>
+    <p className="game-rules">Space, Up arrow, W, click or tap to flap. Each pillar passed is one point; gaps narrow slowly as you score. 10 points counts as a win. With camera gestures on, your hand height steers the bird directly. Keyboard and click still work. Best score is saved on this device only.</p>
   </div>}
